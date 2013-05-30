@@ -42,6 +42,33 @@ red_x_lsb   = 0     # Red x value least-significant 2 bits
 red_y_lsb   = 0     # Red y value least-significant 2 bits
 grn_x_lsb   = 0     # Green x value least-significant 2 bits
 grn_y_lsb   = 0     # Green y value least-significant 2 bits
+blu_x_lsb   = 0     # Blue and white least-significant 2 bits
+blu_y_lsb   = 0
+wht_x_lsb   = 0
+wht_y_lsb   = 0
+red_x_msb   = 0     # Red x value most significant 8 bits.
+red_y_msb   = 0     # Red y value most significant 8 bits
+grn_x_msb   = 0     # Green x value most significant 8 bits
+grn_y_msb   = 0     # Green x value most significant 8 bits
+blu_x_msb   = 0     # Blue x value most significant 8 bits
+blu_y_msb   = 0     # Blue y value most significant 8 bits
+wht_x_msb   = 0     # Default white point x value most significant 8 bits
+wht_y_msb   = 0     # Default white point y value most significant 8 bits
+
+# 35-37 - Established timing bitmap. Supported bitmap for very common timing modes.
+byte_35     = 0
+byte_36     = 0
+byte_37     = 0
+# 38-53
+x_res       = 100
+pix_rat     = 3
+v_freq      = 10
+
+# Descriptor 1 
+pix_clk     = 100
+hor_act     = 10
+hor_blank   = 10
+
 
 def make_edid():
     # Bytes 0-19
@@ -65,7 +92,32 @@ def make_edid():
     s = "0b"+str(DPMS_stnd)+str(DPMS_susp)+str(DPMS_off)+bin(disp_type)[2:]+str(std_RGB)+str(pref_timing)+str(GTF_sup)
     edid += struct.pack("B", int(s, 2))
     # Bytes 25-34
-    
+    s = "0b"+bin(red_x_lsb)[2:]+bin(red_y_lsb)[2:]+bin(grn_x_lsb)[2:]+bin(grn_y_lsb)[2:]
+    edid += struct.pack("B", int(s, 2))
+    s = "0b"+bin(blu_x_lsb)[2:]+bin(blu_y_lsb)[2:]+bin(wht_x_lsb)[2:]+bin(wht_y_lsb)[2:]
+    edid += struct.pack("B", int(s, 2))
+    edid += struct.pack("B", red_x_msb)    
+    edid += struct.pack("B", red_y_msb)    
+    edid += struct.pack("B", grn_x_msb)    
+    edid += struct.pack("B", grn_y_msb)    
+    edid += struct.pack("B", blu_x_msb)    
+    edid += struct.pack("B", blu_y_msb)    
+    edid += struct.pack("B", wht_x_msb)    
+    edid += struct.pack("B", wht_y_msb)    
+    # Bytes 35-37 Established timing maps 
+    edid += struct.pack("B", byte_35)    
+    edid += struct.pack("B", byte_36)    
+    edid += struct.pack("B", byte_37)    
+
+    # Bytes 38-39 Standard timing
+    edid += struct.pack("B", x_res)
+    s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
+    edid += struct.pack("B", int(s, 2))
+
+    # Descriptor 1
+    edid += struct.pack("H", pix_clk)
+    edid += struct.pack("B", hor_act)
+    edid += struct.pack("B", hor_blank)
 
     return edid
     
@@ -73,9 +125,16 @@ def make_edid():
 print "Making edid"
 f = open("edid.dat", "r+b")
 edid = make_edid()
-for i in range(0x80-25):
+for i in range(126-39-4):
     edid += struct.pack("B", 0)
-print "Size is "+str(struct.calcsize(edid))
+edid += struct.pack("B", 1)
+
+checksum = 0
+for i in range(127):
+    checksum += struct.unpack("B", edid[i])[0]
+print "checksum is "+str(checksum)
+edid += struct.pack("B", 256-(checksum%256))
+
 f.write(edid)
 
 print "File done"
