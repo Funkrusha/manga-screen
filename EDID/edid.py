@@ -1,11 +1,24 @@
 #!/usr/bin/python
+'''
+Pru.py file for Replicape. 
+
+Author: Elias Bakken
+email: elias.bakken@gmail.com
+Website: http://www.hipstercircuits.com
+License: BSD
+
+You can use and change this, but keep this heading :)
+'''
 
 # Extended display identification data
+# All of this has been taken from wikipedia. 
+
 
 import struct
+import array
 
 # 0-19
-man_id      = "IAG" # Manufacturer ID, three letters
+man_id      = "IAG" # Manufacturer ID, three letters, upper case
 prod_code   = 1     # Manufacturer product code. 16-bit number, little-endian.
 serial_nr   = 1     # Serial number. 32 bits, little endian.
 week_of_man = 25    # Week of manufacture, 8 bits. 
@@ -64,77 +77,157 @@ x_res       = 100
 pix_rat     = 3
 v_freq      = 10
 
-# Descriptor 1 
-pix_clk     = 100
-hor_act     = 10
-hor_blank   = 10
+# Descriptor 1, 54-71
+pix_clk         = 2500      # Pixel clock in 10 kHz units
+hor_act         = 480       # Horizontal active pixels 8 lsbits 
+hor_blank       = 27        # Horizontal blanking pixels 8 lsbits End of active to start of next active.
+vert_act        = 800       # 
+vert_blank      = 9
+h_sync_off      = 1         # Horizontal sync offset pixels 8 lsbits (0-1023) From blacking start
+h_sync_pw       = 1         # Horizontal sync pulse width pixels 8 lsbits (0-1023)
+v_sync_off      = 1         # Vertical sync offset lines (0-63)
+v_sync_pw       = 1         # Vertical sync pulse width lines (0-63)
+h_disp_size     = 56        # Horizontal display size, mm, 8 lsbits
+v_disp_size     = 93        # Vertical display size, mm, 8 lsbits
+h_bord_px       = 1         # Horizontal border pixels (each side; total is twice this)
+v_bord_ln       = 1         # Vertical border lines (each side; total is twice this)
+interlaced      = 0         # \ Interlaced
+stereo_mode     = 0         # | Stereo mode
+sync_type       = 3         # | Sync type
+v_sync_pol      = 1         # | Vertical sync polarity (1=positive)
+h_sync_pol      = 1         # | HSync polarity (1=positive)
+int_stereo      = 0         # / 2-way line-interleaved stereo, if bits 3-4 are not 00
 
+# Descriptor 2
+monitor_name    = "Replicape LCD"
+
+# Descriptor 3
+min_v_field     = 55       # Minimum vertical field rate (1-255 Hz)
+max_v_field     = 65       # Maximum vertical field rate (1-255 Hz)
+min_h_field     = 42       # Minimum horizontal line rate (1-255 kHz)
+max_h_field     = 67       # Maximum horizontal line rate (1-255 kHz)
+max_px_clk      = 3        # Maximum pixel clock rate, rounded up to 10 MHz multiple (10-255 MHz)
 
 def make_edid():
+    edid = array.array('c', '\0' * 128)    
     # Bytes 0-19
-    edid = struct.pack("BBBBBBBB", 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00) # Header
-    edid += struct.pack("H", int("0b0"+"".join([bin(ord(l)-65)[2:].rjust(5, '0') for l in man_id]), 2))
-    edid += struct.pack("<H", prod_code) 
-    edid += struct.pack("<I", serial_nr) 
-    edid += struct.pack("B", week_of_man) 
-    edid += struct.pack("B", year_of_man-1990) 
-    edid += struct.pack("B", edid_ver) 
-    edid += struct.pack("B", edid_rev) 
+    struct.pack_into("BBBBBBBB", edid, 0, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00) # Header
+    idm = "0b0"+"".join([bin(ord(l)-ord('A')+1)[2:].rjust(5, '0') for l in man_id])
+    struct.pack_into(">H", edid, 8, int(idm, 2))
+    struct.pack_into("<H", edid, 10, prod_code) 
+    struct.pack_into("<I", edid, 12, serial_nr) 
+    struct.pack_into("B", edid, 16, week_of_man) 
+    struct.pack_into("B", edid, 17, year_of_man-1990) 
+    struct.pack_into("B", edid, 18, edid_ver) 
+    struct.pack_into("B", edid, 19, edid_rev) 
     #Bytes 20-24 
     if dig_input == 1:
-        edid += struct.pack("B", vesa_compat+128)
+        struct.pack_into("B", edid, 20, vesa_compat+0x80)
     else:
         s = "0b"+bin(video_white)[2:].rjust(3, '0')+str(blank_black)+str(sep_sync)+str(comp_sync)+str(sync_on_grn)+str(vsync_serr)
-        edid += struct.pack("B", int(s))
-    edid += struct.pack("B", max_hor_img) 
-    edid += struct.pack("B", max_vert_img) 
-    edid += struct.pack("B", disp_gamma) 
-    s = "0b"+str(DPMS_stnd)+str(DPMS_susp)+str(DPMS_off)+bin(disp_type)[2:]+str(std_RGB)+str(pref_timing)+str(GTF_sup)
-    edid += struct.pack("B", int(s, 2))
+        struct.pack_into("B", edid, 20, int(s, 2))
+    struct.pack_into("B", edid, 21, max_hor_img) 
+    struct.pack_into("B", edid, 22, max_vert_img) 
+    struct.pack_into("B", edid, 23, disp_gamma) 
+    s = "0b"+str(DPMS_stnd)+str(DPMS_susp)+str(DPMS_off)+bin(disp_type)[2:].rjust(2, "0")
+    s+= str(std_RGB)+str(pref_timing)+str(GTF_sup)
+    struct.pack_into("B", edid, 24, int(s, 2))
     # Bytes 25-34
-    s = "0b"+bin(red_x_lsb)[2:]+bin(red_y_lsb)[2:]+bin(grn_x_lsb)[2:]+bin(grn_y_lsb)[2:]
-    edid += struct.pack("B", int(s, 2))
-    s = "0b"+bin(blu_x_lsb)[2:]+bin(blu_y_lsb)[2:]+bin(wht_x_lsb)[2:]+bin(wht_y_lsb)[2:]
-    edid += struct.pack("B", int(s, 2))
-    edid += struct.pack("B", red_x_msb)    
-    edid += struct.pack("B", red_y_msb)    
-    edid += struct.pack("B", grn_x_msb)    
-    edid += struct.pack("B", grn_y_msb)    
-    edid += struct.pack("B", blu_x_msb)    
-    edid += struct.pack("B", blu_y_msb)    
-    edid += struct.pack("B", wht_x_msb)    
-    edid += struct.pack("B", wht_y_msb)    
+    s = "0b"+bin(red_x_lsb)[2:].rjust(2, "0")+bin(red_y_lsb)[2:].rjust(2, "0")
+    s+= bin(grn_x_lsb)[2:].rjust(2, "0")+bin(grn_y_lsb)[2:].rjust(2, "0")
+    struct.pack_into("B", edid, 25, int(s, 2))
+    s = "0b"+bin(blu_x_lsb)[2:].rjust(2, "0")+bin(blu_y_lsb)[2:].rjust(2, "0")
+    s+= bin(wht_x_lsb)[2:].rjust(2, "0")+bin(wht_y_lsb)[2:].rjust(2, "0")
+    struct.pack_into("B", edid, 26, int(s, 2))
+    struct.pack_into("B", edid, 27, red_x_msb)    
+    struct.pack_into("B", edid, 28, red_y_msb)    
+    struct.pack_into("B", edid, 29, grn_x_msb)    
+    struct.pack_into("B", edid, 30, grn_y_msb)    
+    struct.pack_into("B", edid, 31, blu_x_msb)    
+    struct.pack_into("B", edid, 32, blu_y_msb)    
+    struct.pack_into("B", edid, 33, wht_x_msb)    
+    struct.pack_into("B", edid, 34, wht_y_msb)    
     # Bytes 35-37 Established timing maps 
-    edid += struct.pack("B", byte_35)    
-    edid += struct.pack("B", byte_36)    
-    edid += struct.pack("B", byte_37)    
+    struct.pack_into("B", edid, 35, byte_35)    
+    struct.pack_into("B", edid, 36, byte_36)    
+    struct.pack_into("B", edid, 37, byte_37)    
 
     # Bytes 38-39 Standard timing
-    edid += struct.pack("B", x_res)
+    struct.pack_into("B", edid, 38, x_res)
     s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
-    edid += struct.pack("B", int(s, 2))
+    struct.pack_into("B", edid, 39, int(s, 2))
 
-    # Descriptor 1
-    edid += struct.pack("H", pix_clk)
-    edid += struct.pack("B", hor_act)
-    edid += struct.pack("B", hor_blank)
+    # Descriptor 1 (54-71)
+    struct.pack_into("H", edid, 54+0, pix_clk)              # Byte 0-1
+    struct.pack_into("B", edid, 54+2, hor_act%256)          # Byte 2
+    struct.pack_into("B", edid, 54+3, hor_blank%256)        # Byte 3
+    s  = "0b"+bin((hor_act&0xF00)>>8)[2:].rjust(4, "0")
+    s += bin((hor_blank&0xF00)>>8)[2:].rjust(4, "0")
+    struct.pack_into("B", edid, 54+4, int(s, 2))            # Byte 4
+    struct.pack_into("B", edid, 54+5, vert_act & 0xFF)      # Byte 5 
+    struct.pack_into("B", edid, 54+6, vert_blank & 0xFF)    # Byte 6
+    s  = "0b"+bin((vert_act & 0xF00)>>8)[2:].rjust(4, "0")
+    s += bin((vert_blank & 0xF00)>>8)[2:].rjust(4, "0")
+    struct.pack_into("B", edid, 54+7, int(s, 2))            # Byte 7
+    struct.pack_into("B", edid, 54+8, h_sync_off & 0xFF)    # Byte 8
+    struct.pack_into("B", edid, 54+9, h_sync_pw & 0xFF)     # Byte 9
+    s  = "0b"+bin(v_sync_off & 0xF)[2:].rjust(4, "0")
+    s += bin(v_sync_pw & 0xF)[2:].rjust(4, "0")
+    struct.pack_into("B", edid, 54+10, int(s, 2))           # Byte 10
+    s  = "0b"+bin( (h_sync_off&0x800)>>8 )[2:].rjust(2, "0")
+    s +=      bin( (h_sync_pw &0x800)>>8 )[2:].rjust(2, "0")
+    s +=      bin( (v_sync_off&0x80 )>>4 )[2:].rjust(2, "0")
+    s +=      bin( (v_sync_pw &0x80 )>>4 )[2:].rjust(2, "0")
+    struct.pack_into("B", edid, 54+11, int(s, 2))           # Byte 11
+    struct.pack_into("B", edid, 54+12, h_disp_size&0xFF)    # Byte 12
+    struct.pack_into("B", edid, 54+13, v_disp_size&0xFF)    # Byte 13
+    s  = "0b"+bin( (h_disp_size&0xF00)>>8 )[2:].rjust(4, "0")
+    s +=      bin( (v_disp_size&0xF00)>>8 )[2:].rjust(4, "0")
+    struct.pack_into("B", edid, 54+14, int(s, 2))           # Byte 14
+    struct.pack_into("B", edid, 54+15, h_bord_px)           # Byte 15
+    struct.pack_into("B", edid, 54+16, v_bord_ln)           # Byte 16
+    s = "0b"+str(interlaced)+bin(stereo_mode)[2:].rjust(2, "0")
+    s += bin(sync_type)[2:].rjust(2, "0")+str(v_sync_pol)+str(h_sync_pol)+str(int_stereo)
+    struct.pack_into("B", edid, 54+17, int(s, 2))           # Byte 17
+
+    # Descriptor 2: Other monitor descriptors (72-89)
+    struct.pack_into("H", edid, 72+0, 0)                    # 0 indicates not timing info
+    struct.pack_into("B", edid, 72+2, 0)                    
+    struct.pack_into("B", edid, 72+3, 0xFC)                 # 0xFF indicates monitor serial number
+    struct.pack_into("B", edid, 72+4, 0)                    
+    # Monitor name   
+    for i, c in enumerate(monitor_name):
+        struct.pack_into("B", edid, 72+5+i, ord(c))
+    struct.pack_into("B", edid, 72+5+len(monitor_name), 0x0A)
+    
+    
+    # Descriptor 3: Monitor range limits (90-107)
+    struct.pack_into("H", edid, 90+0, 0)                    # 0 indicates not timing info
+    struct.pack_into("B", edid, 90+2, 0)                    
+    struct.pack_into("B", edid, 90+3, 0xFD)                 # 0xFF indicates monitor serial number
+    struct.pack_into("B", edid, 90+4, 0)                    
+    struct.pack_into("B", edid, 90+5, min_v_field)
+    struct.pack_into("B", edid, 90+6, max_v_field)
+    struct.pack_into("B", edid, 90+7, min_h_field)
+    struct.pack_into("B", edid, 90+8, max_h_field)
+    struct.pack_into("B", edid, 90+9, max_px_clk)
+
+    struct.pack_into("B", edid, 126, 1)                     # Byte 126
+    
+
+    checksum = 0
+    for i in range(127):
+        checksum += struct.unpack("B", edid[i])[0]
+    checksum %= 256
+    checksum = (256-checksum)
+    struct.pack_into("B", edid, 127, checksum)
 
     return edid
     
-
-print "Making edid"
-f = open("edid.dat", "r+b")
+print "EDID maker V0.1"
 edid = make_edid()
-for i in range(126-39-4):
-    edid += struct.pack("B", 0)
-edid += struct.pack("B", 1)
 
-checksum = 0
-for i in range(127):
-    checksum += struct.unpack("B", edid[i])[0]
-print "checksum is "+str(checksum)
-edid += struct.pack("B", 256-(checksum%256))
-
+f = open("edid.dat", "r+b")
 f.write(edid)
 
-print "File done"
+print "EDID information written to edid.dat"
