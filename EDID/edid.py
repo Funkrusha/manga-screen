@@ -212,7 +212,7 @@ def make_edid():
     struct.pack_into("B", edid, 90+8, max_h_field)
     struct.pack_into("B", edid, 90+9, max_px_clk)
 
-    struct.pack_into("B", edid, 126, 1)                     # Byte 126
+    struct.pack_into("B", edid, 126, 0)                     # Byte 126
     
 
     checksum = 0
