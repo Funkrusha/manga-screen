@@ -1,11 +1,8 @@
- + TH Pads on HDMI connector
- + All components on one side
- + New footprints on the tantalum capacitors
- - C10 and C11 fuher apart
- + Connect VCC with the uC
- + Change pin for the PWM on the uC. (A0.0 not working)
- + Change address of EEPROM by DNI-ing R22
- + Hardcorde address to 0x50, all add pins low. 
- + Change the connector to socket on the LCD display
- + Add connector for programming EEPROM
- + Ground the thermal pad on the buck regulator
+ - Wrong footprint on C24
+ - USB power instead of HDMI since the HDMI has a 0.1A limit..
+ - VDDIO and VCI must be connected to 3.3V
+ - Consider levelshifters. (Two of these: 74ALVC164245)
+ - OCK_INV configurable (by uC) or tied high. 
+ - Connect pin ST (output drive strength) to uC. 
+ - Connect ctrl lines to uC. 
+

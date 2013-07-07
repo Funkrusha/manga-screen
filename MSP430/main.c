@@ -35,7 +35,8 @@ unsigned char BitCnt; 	// Bit count, used when transmitting byte
 unsigned int TXByte; 	// Value sent over UART when Transmit() is called
 
 // Function Definitions
-void LcdInitialise(void);
+void LcdInit(void);
+void LcdUnInit(void);
 void LcdTest(void);
 void LcdWrite(char dnc, char data, char cs);
 char LcdRead(char cs);
@@ -46,12 +47,20 @@ void send(char* str);
 void hex(char x);
 static void __inline__ _brief_pause(register unsigned int n);
 
-void LcdInitialise(void){
-	int data;
-
-
+void LcdInit(void){
 	LcdWrite(LCD_C, 0x11, 1); // Sleep out command
-	delay_ms(130);
+	delay_ms(110);
+	LcdWrite(LCD_C, 0x29, 1); // Display on command
+}
+
+void LcdUnInit(void){
+	LcdWrite(LCD_C, 0x28, 1); // Sleep out command
+	delay_ms(110);
+	LcdWrite(LCD_C, 0x10, 1); // Display on command
+}
+
+void LcdTest(void){
+	char data;
 
 	P1OUT &= ~PIN_NCS; // Select Chip Enable low
 	LcdWrite(LCD_C, 0xB9, 0); // Set extended commands
@@ -62,7 +71,7 @@ void LcdInitialise(void){
 
 	send("RDID2:");
 	P1OUT &= ~PIN_NCS; 
-	LcdWrite(LCD_C, 0xDB, 0); 
+	LcdWrite(LCD_C, 0xDB, 0); // Read the version ID, should be 0x81
 	data = LcdRead(1);
 	hex(data);
 	send("\n");
@@ -72,19 +81,6 @@ void LcdInitialise(void){
 	LcdWrite(LCD_D, 0x50, 0); // 16 bit
 	P1OUT |= PIN_NCS; 
 
-	//P1OUT &= ~PIN_NCS; 
-	//LcdWrite(LCD_C, 0xB3, 0); // Set RGB interface related register (B3h)
-	//LcdWrite(LCD_D, 0x00, 0); // EPL + VSPL + HSPL + DPL
-	//P1OUT |= PIN_NCS; 
-
-
-	delay_ms(130);
-
-	LcdWrite(LCD_C, 0x29, 1); // Display on command
-}
-
-void LcdTest(void){
-	char data;
 
 	send("Display power mode: ");
 	P1OUT &= ~PIN_NCS; // Select Chip Enable low
@@ -153,9 +149,14 @@ void LcdTest(void){
 	else
 		send("\tBooster shit error\n");
 
-	
+		/*P1OUT &= ~PIN_NCS; 
+	LcdWrite(LCD_C, 0xB3, 0); // Set RGB interface related register (B3h)
+	LcdWrite(LCD_D, 0x01, 0); // EPL + VSPL + HSPL + DPL
+	P1OUT |= PIN_NCS; 
+	*/
 
 
+/*
 	send("RDRED: ");
 	P1OUT &= ~PIN_NCS; 
 	LcdWrite(LCD_C, CMD_RDRED, 0);
@@ -174,6 +175,7 @@ void LcdTest(void){
 	data = LcdRead(1);
 	hex(data);
 	send("\n");
+*/
 }
 
 
@@ -247,31 +249,48 @@ int main(void){
 
 	P1OUT |= PIN_RESET;
 	delay_ms(1000); // Wait for power to become stable.
-	delay_ms(1000); // Wait for power to become stable.
+	//delay_ms(1000); // Wait for power to become stable.
 	//delay_ms(1000); // Wait for power to become stable.
 	//delay_ms(1000); // Wait for power to become stable.
 	//delay_ms(1000); // Wait for power to become stable.
 	//delay_ms(1000); // Wait for power to become stable.
 
 	P1OUT &= ~PIN_RESET;
-	delay_ms(10); // Page 13 in manual for LCD
+	delay_ms(1); // Page 13 in manual for LCD
 	P1OUT |= PIN_RESET;
-	delay_ms(100);
-
+	delay_ms(6); // Page 13 in manual for LCD
 	__bis_SR_register(GIE); 	// interrupts enabled
 
 	send("Start\n");
-	LcdTest();
-	LcdInitialise();
-	LcdTest();
+	LcdInit();
+	//LcdTest();
 	send("Done\n");
 
 	bl_init();
 
 	while(1){
-		delay_ms(10000);
-		//LcdTest();
+		delay_ms(1000);
+		/*P1OUT &= ~PIN_NCS; 
+		LcdWrite(LCD_C, 0x0E, 0);
+		data = LcdRead(1);
+		//hex(data);
+		//send("\n");
+		if(data & (1<<2))
+			send("D");
+		//if(data & (1<<3))
+		//	send("C");
+		//if(data & (1<<4))
+		//	send("V");
+		//if(data & (1<<5))
+		//	send("H");
+		send("\n");
+
+		//P1OUT &= ~PIN_NCS; // Select Chip Enable low
+		//LcdWrite(LCD_C, 0x51, 0); // Set extended commands
+		//LcdWrite(LCD_D, data++, 0);
+		//P1OUT |= PIN_NCS; // Select Chip Enable low
 		//bl_init();
+	*/
 	}
 }
 
