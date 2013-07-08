@@ -269,28 +269,20 @@ int main(void){
 	bl_init();
 
 	while(1){
-		delay_ms(1000);
-		/*P1OUT &= ~PIN_NCS; 
+		delay_ms(10000);
+		P1OUT &= ~PIN_NCS; 
 		LcdWrite(LCD_C, 0x0E, 0);
 		data = LcdRead(1);
-		//hex(data);
-		//send("\n");
 		if(data & (1<<2))
 			send("D");
-		//if(data & (1<<3))
-		//	send("C");
-		//if(data & (1<<4))
-		//	send("V");
-		//if(data & (1<<5))
-		//	send("H");
+		if(data & (1<<3))
+			send("C");
+		if(data & (1<<4))
+			send("V");
+		if(data & (1<<5))
+			send("H");
 		send("\n");
-
-		//P1OUT &= ~PIN_NCS; // Select Chip Enable low
-		//LcdWrite(LCD_C, 0x51, 0); // Set extended commands
-		//LcdWrite(LCD_D, data++, 0);
-		//P1OUT |= PIN_NCS; // Select Chip Enable low
-		//bl_init();
-	*/
+		bl_init();
 	}
 }
 

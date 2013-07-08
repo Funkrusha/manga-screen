@@ -84,9 +84,9 @@ hor_blank       = 27        # Horizontal blanking pixels 8 lsbits End of active 
 vert_act        = 800       # 
 vert_blank      = 9
 h_sync_off      = 1         # Horizontal sync offset pixels 8 lsbits (0-1023) From blacking start
-h_sync_pw       = 1         # Horizontal sync pulse width pixels 8 lsbits (0-1023)
+h_sync_pw       = 6         # Horizontal sync pulse width pixels 8 lsbits (0-1023)
 v_sync_off      = 1         # Vertical sync offset lines (0-63)
-v_sync_pw       = 1         # Vertical sync pulse width lines (0-63)
+v_sync_pw       = 3         # Vertical sync pulse width lines (0-63)
 h_disp_size     = 56        # Horizontal display size, mm, 8 lsbits
 v_disp_size     = 93        # Vertical display size, mm, 8 lsbits
 h_bord_px       = 1         # Horizontal border pixels (each side; total is twice this)
@@ -94,12 +94,12 @@ v_bord_ln       = 1         # Vertical border lines (each side; total is twice t
 interlaced      = 0         # \ Interlaced
 stereo_mode     = 0         # | Stereo mode
 sync_type       = 3         # | Sync type
-v_sync_pol      = 1         # | Vertical sync polarity (1=positive)
-h_sync_pol      = 1         # | HSync polarity (1=positive)
+v_sync_pol      = 0         # | Vertical sync polarity (1=positive)
+h_sync_pol      = 0         # | HSync polarity (1=positive)
 int_stereo      = 0         # / 2-way line-interleaved stereo, if bits 3-4 are not 00
 
 # Descriptor 2
-monitor_name    = "Replicape LCD"
+monitor_name    = "Manga Screen"
 
 # Descriptor 3
 min_v_field     = 55       # Minimum vertical field rate (1-255 Hz)
