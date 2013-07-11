@@ -73,20 +73,20 @@ byte_35     = 0
 byte_36     = 0
 byte_37     = 0
 # 38-53
-x_res       = 100
+x_res       = 69 # (100-31)
 pix_rat     = 3
-v_freq      = 10
+v_freq      = 0
 
 # Descriptor 1, 54-71
-pix_clk         = 2500      # Pixel clock in 10 kHz units
+pix_clk         = 2459      # Pixel clock in 10 kHz units
 hor_act         = 480       # Horizontal active pixels 8 lsbits 
-hor_blank       = 27        # Horizontal blanking pixels 8 lsbits End of active to start of next active.
-vert_act        = 800       # 
-vert_blank      = 9
-h_sync_off      = 1         # Horizontal sync offset pixels 8 lsbits (0-1023) From blacking start
-h_sync_pw       = 6         # Horizontal sync pulse width pixels 8 lsbits (0-1023)
-v_sync_off      = 1         # Vertical sync offset lines (0-63)
-v_sync_pw       = 3         # Vertical sync pulse width lines (0-63)
+hor_blank       = 32        # Horizontal blanking pixels 8 lsbits End of act to start of next act.  (HBLK)
+vert_act        = 800       # Vertical active lines 8 lsbits (0-4095)                               
+vert_blank      = 12        # Vertical blanking lines 4 msbits                                      (VBL)
+h_sync_off      = 5         # Horizontal sync offset pixels 8 lsbits (0-1023) From blacking start   (HFP)
+h_sync_pw       = 6         # Horizontal sync pulse width pixels 8 lsbits (0-1023)                  (HS)
+v_sync_off      = 3         # Vertical sync offset lines (0-63)                                     (VFP)
+v_sync_pw       = 3         # Vertical sync pulse width lines (0-63)                                (VS)
 h_disp_size     = 56        # Horizontal display size, mm, 8 lsbits
 v_disp_size     = 93        # Vertical display size, mm, 8 lsbits
 h_bord_px       = 1         # Horizontal border pixels (each side; total is twice this)
@@ -156,6 +156,8 @@ def make_edid():
     struct.pack_into("B", edid, 38, x_res)
     s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
     struct.pack_into("B", edid, 39, int(s, 2))
+    for i in range(54-40):
+        struct.pack_into("B", edid, 40+i, 0x01)    
 
     # Descriptor 1 (54-71)
     struct.pack_into("H", edid, 54+0, pix_clk)              # Byte 0-1
@@ -211,6 +213,23 @@ def make_edid():
     struct.pack_into("B", edid, 90+7, min_h_field)
     struct.pack_into("B", edid, 90+8, max_h_field)
     struct.pack_into("B", edid, 90+9, max_px_clk)
+    struct.pack_into("B", edid, 90+10, 0x00)
+    struct.pack_into("B", edid, 90+11, 0x0A)                    
+    struct.pack_into("B", edid, 90+12, 0x20)                    
+    struct.pack_into("B", edid, 90+13, 0x20)                    
+    struct.pack_into("B", edid, 90+14, 0x20)                    
+    struct.pack_into("B", edid, 90+15, 0x20)                    
+    struct.pack_into("B", edid, 90+16, 0x20)                    
+    struct.pack_into("B", edid, 90+17, 0x20)                    
+
+	# Descriptor 4: Unspecified text 0xFE
+    struct.pack_into("H", edid, 108+0, 0)                    # 0 indicates not timing info
+    struct.pack_into("B", edid, 108+2, 0)                    
+    struct.pack_into("B", edid, 108+3, 0xFE)                 # 0xFF indicates monitor serial number
+    struct.pack_into("B", edid, 108+4, 0)                    
+    struct.pack_into("B", edid, 108+5, 0x0A)                    
+    for i in range(17-6):
+        struct.pack_into("B", edid, 108+5+i, 0x20)    
 
     struct.pack_into("B", edid, 126, 0)                     # Byte 126
     
