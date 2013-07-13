@@ -8,7 +8,10 @@ Changelog from Rev A1 to A2
  + IA logo/manga graphic stuff. 
  + LED for status
  + Bitbanged I2C for the EEPROM
- - I2C connections for the touch panel. 
+ + I2C connections for the touch panel. 
  + SCDT connected to uC to sense if there is data streaming.
  + Test points (HSYNC, VSYNC, PCLOCK, DE)
  + Header pin for external power (DNI)
+ + Consider capacitor on input. 
+ + ATTN pin from the touch panel on interrupt input
+
