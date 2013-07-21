@@ -37,10 +37,13 @@ unsigned int TXByte; 	// Value sent over UART when Transmit() is called
 // Function Definitions
 void LcdInit(void);
 void LcdUnInit(void);
+void LcdGamma(void);
+void LcdExtended(void);
 void LcdTest(void);
 void LcdWrite(char dnc, char data, char cs);
 char LcdRead(char cs);
 void bl_init();
+void bl_off();
 void delay_ms(unsigned int n);			// Delay milliseconds.
 void Transmit(char c);
 void send(char* str);
@@ -51,6 +54,16 @@ void LcdInit(void){
 	LcdWrite(LCD_C, 0x11, 1); // Sleep out command
 	delay_ms(110);
 	LcdWrite(LCD_C, 0x29, 1); // Display on command
+
+	P1OUT &= ~PIN_NCS; 
+	LcdWrite(LCD_C, 0x3A, 0); // Interface pixel format
+	LcdWrite(LCD_D, 0x70, 0); // 24 bit
+	P1OUT |= PIN_NCS; 
+
+	P1OUT &= ~PIN_NCS; 
+	LcdWrite(LCD_C, 0x36, 0); // Memory Access Control
+	LcdWrite(LCD_D, 0x00, 0); // 24 bit
+	P1OUT |= PIN_NCS; 
 }
 
 void LcdUnInit(void){
@@ -59,28 +72,47 @@ void LcdUnInit(void){
 	LcdWrite(LCD_C, 0x10, 1); // Display on command
 }
 
-void LcdTest(void){
-	char data;
+void LcdGamma(void){
+	int i;
+	P1OUT &= ~PIN_NCS; 
+	LcdWrite(LCD_C, 0xC1, 0); // Memory Access Control
+	LcdWrite(LCD_D, 0x00, 0); // DCG_EN = 0
+	for(i=0; i<128; i++){
+		LcdWrite(LCD_D, i*0x00, 0); // Gamma shit
+	}
+	
+	/*for(i=0; i<=33; i++){
+		LcdWrite(LCD_D, i*0x08, 0); // Gamma shit
+	}
+	for(i=34; i<=42; i++){
+		LcdWrite(LCD_D, 0x00, 0); // Gamma shit
+	}
+	for(i=43; i<=75; i++){
+		LcdWrite(LCD_D, (i-0x43)*0x08, 0); // Gamma shit
+	}*/
+	P1OUT |= PIN_NCS; 
 
+
+}
+
+void LcdExtended(void){
 	P1OUT &= ~PIN_NCS; // Select Chip Enable low
 	LcdWrite(LCD_C, 0xB9, 0); // Set extended commands
 	LcdWrite(LCD_D, 0xFF, 0);
 	LcdWrite(LCD_D, 0x83, 0);
 	LcdWrite(LCD_D, 0x63, 0);
 	P1OUT |= PIN_NCS; // Select Chip Enable High
+}
 
-	send("RDID2:");
+void LcdTest(void){
+	char data;
+
+/*	send("RDID2:");
 	P1OUT &= ~PIN_NCS; 
 	LcdWrite(LCD_C, 0xDB, 0); // Read the version ID, should be 0x81
 	data = LcdRead(1);
 	hex(data);
 	send("\n");
-
-	P1OUT &= ~PIN_NCS; 
-	LcdWrite(LCD_C, 0x3A, 0); // Interface pixel format
-	LcdWrite(LCD_D, 0x50, 0); // 16 bit
-	P1OUT |= PIN_NCS; 
-
 
 	send("Display power mode: ");
 	P1OUT &= ~PIN_NCS; // Select Chip Enable low
@@ -149,14 +181,6 @@ void LcdTest(void){
 	else
 		send("\tBooster shit error\n");
 
-		/*P1OUT &= ~PIN_NCS; 
-	LcdWrite(LCD_C, 0xB3, 0); // Set RGB interface related register (B3h)
-	LcdWrite(LCD_D, 0x01, 0); // EPL + VSPL + HSPL + DPL
-	P1OUT |= PIN_NCS; 
-	*/
-
-
-/*
 	send("RDRED: ");
 	P1OUT &= ~PIN_NCS; 
 	LcdWrite(LCD_C, CMD_RDRED, 0);
@@ -176,6 +200,13 @@ void LcdTest(void){
 	hex(data);
 	send("\n");
 */
+
+		/*P1OUT &= ~PIN_NCS; 
+	LcdWrite(LCD_C, 0xB3, 0); // Set RGB interface related register (B3h)
+	LcdWrite(LCD_D, 0x01, 0); // EPL + VSPL + HSPL + DPL
+	P1OUT |= PIN_NCS; 
+	*/
+
 }
 
 
@@ -227,10 +258,17 @@ char LcdRead(char cs){
 	return data;
 }
 
+void bl_off(){
+	CCR0 = 10000-1;             // PWM Period
+	CCTL1 = OUTMOD_7;          // CCR1 reset/set
+	CCR1 = 10000-1;                // CCR1 PWM duty cycle
+	TACTL = TASSEL_2 + MC_1;   // SMCLK, up mode
+}
+
 void bl_init(){
 	CCR0 = 10000-1;             // PWM Period
 	CCTL1 = OUTMOD_7;          // CCR1 reset/set
-	CCR1 = 5000;                // CCR1 PWM duty cycle
+	CCR1 = 7500;                // CCR1 PWM duty cycle
 	TACTL = TASSEL_2 + MC_1;   // SMCLK, up mode
 }
 
@@ -241,19 +279,16 @@ int main(void){
 	BCSCTL1 = CALBC1_1MHZ; // Set range
 	DCOCTL = CALDCO_1MHZ; // SMCLK = DCO = 1MHz
 
+	bl_off();
+
 	P1SEL |= TXD | PIN_BL;
 	P1DIR |= PIN_RESET | TXD | PIN_BL;
 	P1DIR |= PIN_NCS;
 	P1DIR |= PIN_MOSI;
-	P1DIR |= PIN_SCLK;
+	P1DIR |= PIN_SCLK;	
 
 	P1OUT |= PIN_RESET;
-	delay_ms(1000); // Wait for power to become stable.
-	//delay_ms(1000); // Wait for power to become stable.
-	//delay_ms(1000); // Wait for power to become stable.
-	//delay_ms(1000); // Wait for power to become stable.
-	//delay_ms(1000); // Wait for power to become stable.
-	//delay_ms(1000); // Wait for power to become stable.
+	delay_ms(10000); // Wait for power to become stable.
 
 	P1OUT &= ~PIN_RESET;
 	delay_ms(1); // Page 13 in manual for LCD
@@ -261,28 +296,17 @@ int main(void){
 	delay_ms(6); // Page 13 in manual for LCD
 	__bis_SR_register(GIE); 	// interrupts enabled
 
-	send("Start\n");
+	//send("Start\n");
 	LcdInit();
+	//LcdExtended();
+	//LcdGamma();
 	//LcdTest();
-	send("Done\n");
-
+	//send("Done\n");
 	bl_init();
+	
 
 	while(1){
 		delay_ms(10000);
-		P1OUT &= ~PIN_NCS; 
-		LcdWrite(LCD_C, 0x0E, 0);
-		data = LcdRead(1);
-		if(data & (1<<2))
-			send("D");
-		if(data & (1<<3))
-			send("C");
-		if(data & (1<<4))
-			send("V");
-		if(data & (1<<5))
-			send("H");
-		send("\n");
-		bl_init();
 	}
 }
 

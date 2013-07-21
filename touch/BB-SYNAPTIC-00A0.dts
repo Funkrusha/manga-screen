@@ -1,0 +1,32 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+    /* identification */
+    part-number = "BB-SYNAPTIC";
+
+	/* version */
+	version = "00A0";
+
+	fragment@0 {
+		target = <&i2c2>;
+		__overlay__ {
+			#address-cells 	= <1>;
+			#size-cells 	= <0>;
+			status = "okay";
+			clock-frequency = <100000>;
+
+			touch: touch@20 {
+				compatible = "synaptic,3k";
+				//compatible = "melfas,mms114";
+				reg = <0x20>;
+				x-size = <50>;
+				y-size = <100>;
+				contact-threshold = <1>;
+				moving-threshold  = <1>;
+			};
+		};
+	};
+};

@@ -1,0 +1,4 @@
+shlibs:Depends=libc6 (>= 2.4)
+xinpdriver:Depends=xorg-input-abi-18, xserver-xorg-core (>= 2:1.12.99.901)
+xinpdriver:Provides=xorg-driver-input
+misc:Depends=

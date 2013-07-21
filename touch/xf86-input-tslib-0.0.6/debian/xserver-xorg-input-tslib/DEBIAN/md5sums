@@ -1,0 +1,7 @@
+60d4f4d871f6b5b1cfb88fde5b6de239  usr/lib/xorg/modules/input/tslib_drv.so
+aa958b83e2beab0364d8b7a45adef2a9  usr/share/X11/xorg.conf.d/50-tslib.conf
+33a662a56e782459cd7651aebfcadb53  usr/share/doc/xserver-xorg-input-tslib/buildinfo_armhf.gz
+642b49167a9ec8f16532fa4172c8fb3e  usr/share/doc/xserver-xorg-input-tslib/changelog.Debian.gz
+a5595aef904316c6eacf9576532dd330  usr/share/doc/xserver-xorg-input-tslib/changelog.gz
+d0101574b9e6b1e1c6e52a638338ce5f  usr/share/doc/xserver-xorg-input-tslib/copyright
+579a9675d27780b96dbd6b6216603d28  usr/share/man/man4/tslib.4.gz

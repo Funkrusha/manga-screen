@@ -1,0 +1,19 @@
+Package: xserver-xorg-input-tslib
+Source: xf86-input-tslib
+Version: 0.0.6-7build3
+Architecture: armhf
+Maintainer: Debian Embedded <debian-embedded@lists.debian.org>
+Installed-Size: 78
+Depends: libc6 (>= 2.4), xorg-input-abi-18, xserver-xorg-core (>= 2:1.12.99.901)
+Conflicts: xf86-input-tslib
+Replaces: xf86-input-tslib
+Provides: xf86-input-tslib, xorg-driver-input
+Section: x11
+Priority: optional
+Homepage: http://pengutronix.de/software/xf86-input-tslib/index_en.html
+Description: tslib touchscreen driver for X.Org/XFree86 server
+ This X.Org/XFree86 driver provides support for touchscreens input
+ devices.  The driver is based on tslib which supports events for moving
+ in absolute coordinates and relative coordinates.
+ .
+ This package is built from the xf86-input-tslib driver module.

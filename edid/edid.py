@@ -1,6 +1,6 @@
 #!/usr/bin/python
 '''
-Pru.py file for Replicape. 
+edid.py File for making EDID information. 
 
 Author: Elias Bakken
 email: elias.bakken@gmail.com
@@ -39,7 +39,7 @@ vsync_serr  = 0     # VSync pulse must be serrated when composite or sync-on-gre
 
 max_hor_img = 10    # Maximum horizontal image size, in centimetres (max 292 cm/115 in at 16:9 aspect ratio)
 max_vert_img= 6     # Maximum vertical image size, in centimetres. If either byte is 0, undefined (e.g. projector)
-disp_gamma  = 128   # Display gamma, datavalue  
+disp_gamma  = 120   # Display gamma, datavalue  
 DPMS_stnd   = 1     # DPMS standby supported
 DPMS_susp   = 1     # DPMS suspend supported
 DPMS_off    = 1     # DPMS active-off supported
@@ -51,6 +51,15 @@ pref_timing = 1     # Preferred timing mode specified in descriptor block 1.
 GTF_sup     = 1     # GTF supported with default parameter values.
 
 # 25-34 - Chromaticity coordinates.
+red_x   = 0.633
+red_y   = 0.340
+green_x = 0.295
+green_y = 0.591
+blue_x  = 0.141
+blue_y  = 0.096
+white_x = 0.312
+white_y = 0.328
+
 red_x_lsb   = 0     # Red x value least-significant 2 bits
 red_y_lsb   = 0     # Red y value least-significant 2 bits
 grn_x_lsb   = 0     # Green x value least-significant 2 bits
@@ -59,22 +68,22 @@ blu_x_lsb   = 0     # Blue and white least-significant 2 bits
 blu_y_lsb   = 0
 wht_x_lsb   = 0
 wht_y_lsb   = 0
-red_x_msb   = 0     # Red x value most significant 8 bits.
-red_y_msb   = 0     # Red y value most significant 8 bits
-grn_x_msb   = 0     # Green x value most significant 8 bits
-grn_y_msb   = 0     # Green x value most significant 8 bits
-blu_x_msb   = 0     # Blue x value most significant 8 bits
-blu_y_msb   = 0     # Blue y value most significant 8 bits
-wht_x_msb   = 0     # Default white point x value most significant 8 bits
-wht_y_msb   = 0     # Default white point y value most significant 8 bits
+red_x_msb   = red_x*(2**8)     # Red x value most significant 8 bits.
+red_y_msb   = red_y*(2**8)     # Red y value most significant 8 bits
+grn_x_msb   = green_x*(2**8)     # Green x value most significant 8 bits
+grn_y_msb   = green_y*(2**8)     # Green x value most significant 8 bits
+blu_x_msb   = blue_x*(2**8)     # Blue x value most significant 8 bits
+blu_y_msb   = blue_y*(2**8)     # Blue y value most significant 8 bits
+wht_x_msb   = white_x*(2**8)     # Default white point x value most significant 8 bits
+wht_y_msb   = white_y*(2**8)     # Default white point y value most significant 8 bits
 
 # 35-37 - Established timing bitmap. Supported bitmap for very common timing modes.
 byte_35     = 0
 byte_36     = 0
 byte_37     = 0
 # 38-53
-x_res       = 69 # (100-31)
-pix_rat     = 3
+x_res       = 0 # (100-31)
+pix_rat     = 0
 v_freq      = 0
 
 # Descriptor 1, 54-71
@@ -89,8 +98,8 @@ v_sync_off      = 3         # Vertical sync offset lines (0-63)                 
 v_sync_pw       = 3         # Vertical sync pulse width lines (0-63)                                (VS)
 h_disp_size     = 56        # Horizontal display size, mm, 8 lsbits
 v_disp_size     = 93        # Vertical display size, mm, 8 lsbits
-h_bord_px       = 1         # Horizontal border pixels (each side; total is twice this)
-v_bord_ln       = 1         # Vertical border lines (each side; total is twice this)
+h_bord_px       = 0         # Horizontal border pixels (each side; total is twice this)
+v_bord_ln       = 0         # Vertical border lines (each side; total is twice this)
 interlaced      = 0         # \ Interlaced
 stereo_mode     = 0         # | Stereo mode
 sync_type       = 3         # | Sync type
@@ -156,8 +165,8 @@ def make_edid():
     struct.pack_into("B", edid, 38, x_res)
     s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
     struct.pack_into("B", edid, 39, int(s, 2))
-    for i in range(54-40):
-        struct.pack_into("B", edid, 40+i, 0x01)    
+    for i in range(40, 53):
+        struct.pack_into("B", edid, i, 0x01)    
 
     # Descriptor 1 (54-71)
     struct.pack_into("H", edid, 54+0, pix_clk)              # Byte 0-1
