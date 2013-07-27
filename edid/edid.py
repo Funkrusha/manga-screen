@@ -257,5 +257,13 @@ edid = make_edid()
 
 f = open("edid.dat", "r+b")
 f.write(edid)
+f.close()
+
+f = open("edid.c", "w+")
+f.write("char edid[] = {")
+for i in range(128):
+    f.write(hex(struct.unpack("B", edid[i])[0])+", ")
+f.write("};")
+f.close()
 
 print "EDID information written to edid.dat"

@@ -155,6 +155,7 @@ static void ReadInput (InputInfoPtr local)
 	struct timeval now;
 
 	while((ret = ts_read(priv->ts, &samp, 1)) == 1) {
+
 		gettimeofday(&now, NULL);
 		struct timeval pressureTime = TimevalDiff(now,priv->button_down_start);
 
@@ -571,7 +572,7 @@ xf86TslibInit(InputDriverPtr drv, IDevPtr dev, int flags)
 		return BadValue;
 	}
 
-	ErrorF("ts_config()\n");
+	ErrorF("Calling ts_config()\n");
 	if (ts_config(priv->ts)) {
 		ErrorF("ts_config failed\n");
 		xf86DeleteInput(pInfo, 0);
