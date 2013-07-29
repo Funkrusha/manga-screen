@@ -681,7 +681,7 @@
 		 *  Type define for a digitizer report
 		 */
 		typedef struct 
-      { 
+      	{ 
          uint8_t Finger; 
          uint8_t Temp; 
          int16_t X;    

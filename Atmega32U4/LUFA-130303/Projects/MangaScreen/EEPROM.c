@@ -23,9 +23,11 @@ char d_addr = 0;
 int read_addr;
 int cond;
 
-void EEPROM_Init(){
+int EEPROM_Init(){
 	I2C_Init();
 	EnableI2CInterrupt();
+
+	return 0;
 }
 
 /* Enable ionterrupt on falling edge */
@@ -60,9 +62,7 @@ ISR(INT3_vect){
 				continue;			
 			if(cond == COND_NONE)
 				return;
-			sendString("Err: ", 0);
-			sendString(to_hex(cond), 0);				
-			sendString("\n", 1);
+			printf("Err: %x\n", cond);
 			return;				
 		}
 	}

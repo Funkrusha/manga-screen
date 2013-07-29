@@ -98,15 +98,20 @@ USB_ClassInfo_HID_Device_t Digitizer_HID_Interface =
 		},
 };
 
+static FILE mystdout = FDEV_SETUP_STREAM(putchar_printf, NULL, _FDEV_SETUP_WRITE);
 
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
 int main(void){
 
+	// Bind to output som we can use printf
+	stdout = &mystdout;
+
 	SetupHardware();
 
 	RingBuffer_InitBuffer(&FromHost_Buffer, FromHost_Buffer_Data, sizeof(FromHost_Buffer_Data));
+
 
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	GlobalInterruptEnable();
@@ -123,6 +128,8 @@ int main(void){
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware(void){
+	int ret;
+
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
@@ -133,9 +140,19 @@ void SetupHardware(void){
 	/* Hardware Initialization */
 	LEDs_Init();
 	USB_Init();
-	EEPROM_Init();
-	LCD_Init();
-	//Digitizer_Init();
+
+	ret = EEPROM_Init();
+	if(ret)
+		dev_err("EEPROM error: %x\n", ret);
+
+	ret = LCD_Init();
+	if(ret)
+		dev_err("LCD error: %x\n", ret);
+
+	ret = Digitizer_Init();
+	if(ret)
+		dev_err("Digitizer error: %x\n", ret);
+
 	BL_on(128);		
 		
 	DDRC  |= PIN_PD;  // Powerdown 
@@ -175,32 +192,40 @@ void HandleSerial(void){
 	}
 }
 
-/* Send a string via virtual serial port */ 
-void sendString(char* s, int flush){
-	CDC_Device_SendString(&VirtualSerial_CDC_Interface, s);
-	if(flush)
-		CDC_Device_Flush(&VirtualSerial_CDC_Interface);
+/* Binding for printf */ 
+int putchar_printf(char var, FILE *stream) {
+    if (var == '\n') 
+		CDC_Device_SendByte(&VirtualSerial_CDC_Interface, '\r');
+	CDC_Device_SendByte(&VirtualSerial_CDC_Interface, var);
+    return 0;
 }
-
 
 /** Execute a command received via virtual serial */
 int execute_command(void){
 	if(strcmp(cmd, "help") == 0)
-		sendString("No help here, google it!\r\n", 0);
-	if(strcmp(cmd, "init_tp") == 0){
-		sendString("Initializing digitizer..\r\n", 0);
+		printf("No help here, google it!\n");
+	else if(strcmp(cmd, "init_tp") == 0){
+		printf("Initializing digitizer..\n");
 		Digitizer_Init();
-		sendString("Done!\r\n", 0);
+		printf("Done!\n");
 	}
-
-	sendString(">", 1);
+	else if(strcmp(cmd, "repport") == 0){
+		printf("Get repport\n");
+		Digitizer_get_report();
+		printf("Done!\n");
+	}
+	printf(">");
 
 	return 0;
 }
 
 /** Get data from the touch screen digitizer */
 void HandleDigitizer(void){
+	//Digitizer_get_report();
+}
 
+void input_sync(USB_DigitizerReport_Data_t* DigitizerReport){
+	
 }
 
 /** Event handler for the library USB Connection event. */

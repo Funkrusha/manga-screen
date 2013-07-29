@@ -54,6 +54,13 @@
 		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include <LUFA/Drivers/USB/USB.h>
 
+		#define dev_err(format, arg...) printf(format , ## arg)
+		#define dev_info(format, arg...) printf(format , ## arg)
+		#define dev_dbg(format, arg...) printf(format , ## arg)
+		#define dev_warn(format, arg...) printf(format , ## arg)
+
+
+
 	/* Macros: */
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
 		#define LEDMASK_USB_NOTREADY      LEDS_LED2
@@ -94,7 +101,10 @@
 		void HandleDigitizer(void);
 		void HandleEEPROM(void);
 		int execute_command(void);
-		void sendString(char* s, int flush);
+
+		void input_sync(USB_DigitizerReport_Data_t* DigitizerReport);
+
+		int putchar_printf(char var, FILE *stream);
 
 		void EVENT_USB_Device_Connect(void);
 		void EVENT_USB_Device_Disconnect(void);

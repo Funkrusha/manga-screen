@@ -9,7 +9,7 @@ as an interrupt oon the SCL line which is PD3 */
 #include <avr/interrupt.h>
 #include "MangaScreen.h"
 
-void EEPROM_Init(void);
+int EEPROM_Init(void);
 void EnableI2CInterrupt(void);
 void DisableI2CInterrupt(void);
 

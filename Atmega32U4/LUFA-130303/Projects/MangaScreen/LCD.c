@@ -2,7 +2,7 @@
 
 #include "LCD.h"
 
-void LCD_Init(void){
+int LCD_Init(void){
 
 	DDRB |=  PIN_NCS; 	// PB0
 	DDRB |=  PIN_SCLK;  // PB1
@@ -33,7 +33,9 @@ void LCD_Init(void){
 	LCD_CS_Low();
 	LcdWrite(LCD_C, 0x36, 0); // Memory Access Control
 	LcdWrite(LCD_D, 0x00, 0); // 24 bit
-	LCD_CS_High();		
+	LCD_CS_High();
+
+	return 0;		
 }
 
 void LCD_UnInit(void){

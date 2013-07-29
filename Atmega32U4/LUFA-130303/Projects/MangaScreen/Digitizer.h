@@ -6,7 +6,33 @@
 
 #include "MangaScreen.h"
 #include <stdlib.h>
+#include <stdio.h>
 	
+#define le16_to_cpus(x) do { (void)(x); } while (0)
+
+/*
+ * Divide positive or negative dividend by positive divisor and round
+ * to closest integer. Result is undefined for negative divisors and
+ * for negative dividends if the divisor variable type is unsigned.
+ */
+#define DIV_ROUND_CLOSEST(x, divisor)(                  \
+{                                                       \
+        typeof(x) __x = x;                              \
+        typeof(divisor) __d = divisor;                  \
+        (((typeof(x))-1) > 0 ||                         \
+         ((typeof(divisor))-1) > 0 || (__x) > 0) ?      \
+                (((__x) + ((__d) / 2)) / (__d)) :       \
+                (((__x) - ((__d) / 2)) / (__d));        \
+}                                                       \
+)
+
+
+typedef uint16_t u16;
+typedef unsigned long int u32;
+typedef uint8_t  u8;
+
+unsigned long int_sqrt(unsigned long x);
+
 // Standard linux error codes
 #define EPERM            1      /* Operation not permitted */
 #define ENOENT           2      /* No such file or directory */
@@ -42,6 +68,8 @@
 #define EPIPE           32      /* Broken pipe */
 #define EDOM            33      /* Math argument out of domain of func */
 #define ERANGE          34      /* Math result not representable */
+
+#define IRQF_TRIGGER_FALLING    0x00000002
 
 /* Version */
 #define MXT_VER_20		20
@@ -288,9 +316,33 @@
 /* For CMT (must match XRANGE/YRANGE as defined in board config */
 #define MXT_PIXELS_PER_MM	20
 
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint8_t  u8;
+
+/* Orient */
+#define MXT_NORMAL		0x0
+#define MXT_DIAGONAL		0x1
+#define MXT_HORIZONTAL_FLIP	0x2
+#define MXT_ROTATED_90_COUNTER	0x3
+#define MXT_VERTICAL_FLIP	0x4
+#define MXT_ROTATED_90		0x5
+#define MXT_ROTATED_180		0x6
+#define MXT_DIAGONAL_COUNTER	0x7
+
+/* The platform data for the Atmel maXTouch touchscreen driver */
+struct mxt_platform_data {
+	const u8 *config;
+	size_t config_length;
+
+	unsigned int x_line;
+	unsigned int y_line;
+	unsigned int x_size;
+	unsigned int y_size;
+	unsigned int blen;
+	unsigned int threshold;
+	unsigned long voltage;
+	unsigned char orient;
+	unsigned long irqflags;
+};
+
 
 struct mxt_cfg_file_hdr {
 	bool valid;
@@ -332,6 +384,7 @@ struct mxt_message {
 struct mxt_data {
 	//struct i2c_client *client;
 	//struct input_dev *input_dev;
+	USB_DigitizerReport_Data_t* report;
 	char phys[64];		/* device physical location */
 	const struct mxt_platform_data *pdata;
 	struct mxt_object *object_table;
@@ -413,25 +466,46 @@ struct mxt_data {
 	bool current_id[MXT_MAX_FINGER];
 };
 
-#define TWI_OK				0 
-#define TWI_ERROR  		 	1
-#define TWI_ERROR_START  	2
-#define TWI_ERROR_REP_START 3
-#define TWI_ERROR_
-#define TWI_ERROR_WRITE  	4
-
-
-void dev_err(const char* msg);
 
 int Digitizer_Init(void);
+int Digitizer_get_report(void);
 
-static int mxt_get_info(struct mxt_data *data);
-static int mxt_initialize(struct mxt_data *data);
-static int __mxt_read_reg(uint16_t reg, uint16_t len, void *val);
+bool mxt_object_writable(unsigned int type);
+void mxt_dump_message(struct mxt_message *message);
+
+unsigned mxt_extract_T6_csum(const u32 *csum);
+
+void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, int id);
+void mxt_input_button(struct mxt_data *data, struct mxt_message *message);
+
+u32 crc24_step(u32 crc, u8 byte1, u8 byte2);
+u32 crc24(u32 crc, const u8 *data, size_t len);
+int mxt_verify_info_block_csum(struct mxt_data *data);
+int mxt_get_info(struct mxt_data *data);
+void mxt_free_object_table(struct mxt_data *data);
+int mxt_initialize(struct mxt_data *data);
+int mxt_calc_resolution(struct mxt_data *data);
+int mxt_get_object_table(struct mxt_data *data);
+struct mxt_object *mxt_get_object(struct mxt_data *data, u8 type);
+
+int mxt_handle_messages(struct mxt_data *data, bool report);
+
+int mxt_read_num_messages(struct mxt_data *data, u8 *count);
+
+int mxt_apply_pdata_config(struct mxt_data *data);
+int mxt_handle_pdata(struct mxt_data *data);
+
+int mxt_write_obj_instance(struct mxt_data *data, u8 type, u8 instance, u8 offset, u8 val);
+int mxt_write_object(struct mxt_data *data, u8 type, u8 offset, u8 val);
+
+// Level 2 
+int __mxt_read_reg(uint16_t reg, uint16_t len, void *val);
+int __mxt_write_reg(u16 reg, u16 len, const void *val);
 
 int i2c_recv(uint16_t addr, uint8_t *buf, int count);
 int i2c_send(uint16_t addr, const uint8_t *buf, int count);
 
+// Level 1 
 void TWI_Init(void);
 void TWI_Start(void);
 void TWI_Stop(void);

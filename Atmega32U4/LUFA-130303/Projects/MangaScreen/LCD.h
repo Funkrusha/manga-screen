@@ -25,7 +25,7 @@ LQ043.. LCD from SHARP */
 #define TO_HEX(i) (i <= 9 ? '0' + i : 'A' - 10 + i)
 
 // Function Definitions
-void LCD_Init(void);
+int LCD_Init(void);
 void LCD_UnInit(void);
 void LcdExtended(void);
 void LcdTest(void);
