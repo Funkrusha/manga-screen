@@ -219,7 +219,7 @@ void BL_off(){
 
 /* Setup PWM on pin PD7, see page 162 in the Datasheet */
 void BL_on(char duty){
-	TCCR4B = (0<<PWM4X)  | (0<<PSR4) | (0<<DTPS41) | (0<<DTPS40) | (0<<CS43) | (0<<CS42) | (0<<CS41) | (1<<CS40); 
+	TCCR4B = (0<<PWM4X)  | (0<<PSR4) | (0<<DTPS41) | (0<<DTPS40) | (1<<CS43) | (0<<CS42) | (0<<CS41) | (1<<CS40); 
 	TCCR4C = (1<<COM4D1) | (0<<COM4D0) | (0<<FOC4D) | (1<<PWM4D); 
 	TCCR4D = (0<<WGM41)  | (0<<WGM40); // Count up -mode, Fast PWM if PWM4D == 1
 	TCCR4E = (0<<TLOCK4) | (0<<ENHC4) | (0<<OC4OE5) | (0<<OC4OE4) | (0<<OC4OE3) | (0<<OC4OE2) | (0<<OC4OE1) | (0<<OC4OE0); 

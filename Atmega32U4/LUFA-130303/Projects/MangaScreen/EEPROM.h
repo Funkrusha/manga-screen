@@ -8,7 +8,6 @@ as an interrupt oon the SCL line which is PD3 */
 
 #include <avr/interrupt.h>
 #include "MangaScreen.h"
-//#include "i2csoft.h"
 
 void EEPROM_Init(void);
 void EnableI2CInterrupt(void);

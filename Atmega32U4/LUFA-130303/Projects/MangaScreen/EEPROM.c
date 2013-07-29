@@ -138,7 +138,7 @@ int I2C_put_byte(char data){
 		else
 			DDRD  |=  SDA; 				// output
 		sync(0, 30); 					// Sync on rising SCK edge
-		cond = wait_for_condition(25);	// Sync on falling edge
+		cond = wait_for_condition(27);	// Sync on falling edge
 		if(cond != COND_NONE){
 			DDRD  &= ~SDA; 				// input
 			return cond;

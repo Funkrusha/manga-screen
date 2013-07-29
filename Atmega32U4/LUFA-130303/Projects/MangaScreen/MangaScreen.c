@@ -135,7 +135,7 @@ void SetupHardware(void){
 	USB_Init();
 	EEPROM_Init();
 	LCD_Init();
-	Digitizer_Init();
+	//Digitizer_Init();
 	BL_on(128);		
 		
 	DDRC  |= PIN_PD;  // Powerdown 
@@ -147,32 +147,32 @@ void SetupHardware(void){
 
 /** Checks for changes in the position of the board joystick, sending strings to the host upon each change. */
 void HandleSerial(void){
-	char* response = NULL;
+	int err;
 
 	/* Only try to read in bytes from the CDC interface if the transmit buffer is not full */
 	if (!(RingBuffer_IsFull(&FromHost_Buffer))){
 		int16_t ReceivedByte = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
-
 		/* Read bytes from the USB OUT endpoint into the USART transmit buffer */
-		if (!(ReceivedByte < 0))
-		  RingBuffer_Insert(&FromHost_Buffer, ReceivedByte);
+		if (!(ReceivedByte < 0)){
+		  	RingBuffer_Insert(&FromHost_Buffer, ReceivedByte);
+			CDC_Device_SendByte(&VirtualSerial_CDC_Interface, ReceivedByte);
+		}
 	}
 
 	while (RingBuffer_GetCount(&FromHost_Buffer) > 0){
 		int16_t c = RingBuffer_Remove(&FromHost_Buffer);
 		
-		if(c == '\n'){
+		if(c == '\n' || c == '\r'){
+			if(cmd_cnt > 0 && (cmd[cmd_cnt-1] == '\n'))
+				cmd_cnt--;
 			cmd[cmd_cnt] = 0;			
-			response = execute_command();
+			err = execute_command();
 			cmd_cnt = 0;			
 		}
 		else{
 			cmd[cmd_cnt++] = c;			
 		}
 	}
-
-	if (response != NULL)
-		CDC_Device_SendString(&VirtualSerial_CDC_Interface, response);
 }
 
 /* Send a string via virtual serial port */ 
@@ -184,9 +184,18 @@ void sendString(char* s, int flush){
 
 
 /** Execute a command received via virtual serial */
-char* execute_command(void){
-	char* response = NULL;
-	return response;
+int execute_command(void){
+	if(strcmp(cmd, "help") == 0)
+		sendString("No help here, google it!\r\n", 0);
+	if(strcmp(cmd, "init_tp") == 0){
+		sendString("Initializing digitizer..\r\n", 0);
+		Digitizer_Init();
+		sendString("Done!\r\n", 0);
+	}
+
+	sendString(">", 1);
+
+	return 0;
 }
 
 /** Get data from the touch screen digitizer */

@@ -54,9 +54,6 @@
 		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include <LUFA/Drivers/USB/USB.h>
 
-		#include <LUFA/Drivers/Peripheral/SPI.h>
-		#include <LUFA/Drivers/Peripheral/TWI.h>
-
 	/* Macros: */
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
 		#define LEDMASK_USB_NOTREADY      LEDS_LED2
@@ -96,7 +93,7 @@
 		void HandleSerial(void);
 		void HandleDigitizer(void);
 		void HandleEEPROM(void);
-		char* execute_command(void);
+		int execute_command(void);
 		void sendString(char* s, int flush);
 
 		void EVENT_USB_Device_Connect(void);
