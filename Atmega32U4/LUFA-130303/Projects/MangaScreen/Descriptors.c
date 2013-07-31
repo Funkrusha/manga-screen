@@ -46,6 +46,7 @@
  */
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM DigitizerReport[] =
 {
+	//HID_DESCRIPTOR_MOUSE(-1, 1, -1, 1, 3, false)
 	HID_DESCRIPTOR_DIGITIZER()
 };
 
@@ -65,8 +66,11 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
-	.VendorID               = 0x03EB,
+	//.VendorID               = 0x0dfc,
+	//.ProductID              = 0x0001,
+	.VendorID               = 0x03EB, 
 	.ProductID              = 0x2062,
+
 	.ReleaseNumber          = VERSION_BCD(00.01),
 
 	.ManufacturerStrIndex   = 0x01,
@@ -209,8 +213,8 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.TotalEndpoints         = 1,
 
 			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_NonBootSubclass,
-			.Protocol               = HID_CSCP_NonBootProtocol,
+			.SubClass               = HID_CSCP_NonBootSubclass, //HID_CSCP_BootSubclass,
+			.Protocol               = HID_CSCP_NonBootProtocol, //HID_CSCP_MouseBootProtocol,
 
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},

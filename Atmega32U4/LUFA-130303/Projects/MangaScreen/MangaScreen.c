@@ -75,8 +75,11 @@ static RingBuffer_t FromHost_Buffer;
 /** Underlying data buffer for \ref FromHost_Buffer, where the stored bytes are located. */
 static uint8_t  FromHost_Buffer_Data[128];
 
+USB_DigitizerReport_Data_t* DigitizerReport;
+
 char cmd[100];
 int cmd_cnt;
+bool enable_reports = false;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -118,7 +121,7 @@ int main(void){
 
 	for (;;){
 		HandleSerial();		
-		HandleDigitizer();
+		//HandleDigitizer();
 
 		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 		HID_Device_USBTask(&Digitizer_HID_Interface);
@@ -149,9 +152,9 @@ void SetupHardware(void){
 	if(ret)
 		dev_err("LCD error: %x\n", ret);
 
-	ret = Digitizer_Init();
-	if(ret)
-		dev_err("Digitizer error: %x\n", ret);
+	//ret = Digitizer_Init();
+	//if(ret)
+	//	dev_err("Digitizer error: %x\n", ret);
 
 	BL_on(128);		
 		
@@ -204,28 +207,24 @@ int putchar_printf(char var, FILE *stream) {
 int execute_command(void){
 	if(strcmp(cmd, "help") == 0)
 		printf("No help here, google it!\n");
-	else if(strcmp(cmd, "init_tp") == 0){
+	else if(strcmp(cmd, "init") == 0){
 		printf("Initializing digitizer..\n");
 		Digitizer_Init();
 		printf("Done!\n");
 	}
-	else if(strcmp(cmd, "repport") == 0){
-		printf("Get repport\n");
-		Digitizer_get_report();
+	else if(strcmp(cmd, "raport") == 0){
+		printf("Get raport\n");
+		Digitizer_get_report(DigitizerReport);
+		printf("Done!\n");
+	}
+	else if(strcmp(cmd, "enable") == 0){
+		printf("Enable raporting\n");
+		enable_reports = true;
 		printf("Done!\n");
 	}
 	printf(">");
 
 	return 0;
-}
-
-/** Get data from the touch screen digitizer */
-void HandleDigitizer(void){
-	//Digitizer_get_report();
-}
-
-void input_sync(USB_DigitizerReport_Data_t* DigitizerReport){
-	
 }
 
 /** Event handler for the library USB Connection event. */
@@ -279,15 +278,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 
 	USB_DigitizerReport_Data_t* DigitizerReport = (USB_DigitizerReport_Data_t*)ReportData;
-
-    if (1) 
-    {
-        DigitizerReport->X = 100; 
-        DigitizerReport->Y = 150; 
-        DigitizerReport->Finger =0x03; 
-        DigitizerReport->Temp= 0x00; 
-    } 
-
+	if(enable_reports)
+		Digitizer_get_report(DigitizerReport);
     *ReportSize = sizeof(USB_DigitizerReport_Data_t);
     return true;
 }

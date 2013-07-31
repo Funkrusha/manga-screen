@@ -17,7 +17,6 @@ int sync(char level, int timeout);
 void I2C_Init(void);
 int I2C_get_byte(char* data, int ack);
 int I2C_put_byte(char data);
-ISR(INT3_vect);
 #endif
 
 

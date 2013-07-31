@@ -56,6 +56,8 @@ int Digitizer_Init(void){
 	pdata->voltage			= 2800000;		/* 2.8V */
 	pdata->orient			= MXT_DIAGONAL_COUNTER;
 	pdata->irqflags			= IRQF_TRIGGER_FALLING;
+	pdata->config 			= NULL;
+	pdata->config_length	= 0;
 
 	data->pdata = pdata;
 
@@ -79,9 +81,13 @@ int Digitizer_Init(void){
 }
 
 
-int Digitizer_get_report(void){	
-	
-	mxt_handle_messages(data, true);
+int Digitizer_get_report(USB_DigitizerReport_Data_t* DigitizerReport){	
+	int ret;
+
+	data->report = DigitizerReport;
+	ret = mxt_handle_messages(data, true);
+	if (ret)
+		dev_err("Failed to get Digitizer report. Err = %x\n", ret);
 
 	return 0;
 }
@@ -108,7 +114,7 @@ bool mxt_is_T9_message(struct mxt_data *data, struct mxt_message *msg){
 
 int mxt_proc_messages(struct mxt_data *data, u8 count, bool report){
 	u8 reportid;
-	bool update_input = false;
+	//bool update_input = false;
 	struct mxt_message *messages, *msg;
 	int ret;
 
@@ -139,17 +145,17 @@ int mxt_proc_messages(struct mxt_data *data, u8 count, bool report){
 		} else if (mxt_is_T9_message(data, msg)) {
 			int id = reportid - data->T9_reportid_min;
 			mxt_input_touchevent(data, msg, id);
-			update_input = true;
+			//update_input = true;
 		} else if (msg->reportid == data->T19_reportid) {
-			mxt_input_button(data, msg);
-			update_input = true;
+			//mxt_input_button(data, msg);
+			//update_input = true;
 		}
 	}
 
-	if (update_input) {
+	//if (update_input) {
 		//input_mt_report_pointer_emulation(data->input_dev, false);
-		input_sync(data->report);
-	}
+		//input_sync(data->report);
+	//}
 
 out:
 	free(messages);
@@ -176,7 +182,6 @@ int get_touch_major_pixels(struct mxt_data *data, int touch_channels){
 
 void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, int id){
 	u8 status = message->message[0];
-	//struct input_dev *input_dev = data->input_dev;
 	int x;
 	int y;
 	int area;
@@ -217,6 +222,12 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	data->current_id[id] = status & MXT_DETECT;
 
 	if (status & MXT_DETECT) {
+		data->report->X = x;
+		data->report->Y = y;
+		//report->Pressure = pressure;
+		data->report->Finger = id;
+		data->report->Temp = touch_major;
+
 		//input_report_abs(input_dev, ABS_MT_POSITION_X, x);
 		//input_report_abs(input_dev, ABS_MT_POSITION_Y, y);
 		//input_report_abs(input_dev, ABS_MT_PRESSURE, pressure);
@@ -516,8 +527,10 @@ int mxt_apply_pdata_config(struct mxt_data *data){
 
 		ret = __mxt_write_reg(object->start_address,
 				size, &pdata->config[index]);
-		if (ret)
+		if (ret){
+			dev_err("Failed to apply config\n");
 			return ret;
+		}
 		index += size;
 	}
 
@@ -658,12 +671,12 @@ int mxt_get_info(struct mxt_data *data){
 }
 
 
-int __mxt_read_reg(u16 reg, u16 len, void *val){
+int __mxt_read_reg(uint16_t reg, uint16_t len, void *val){
 	int ret;
 
-	ret = i2c_recv(reg, (u8*) val, len);
+	ret = i2c_recv(reg, val, len);
 	if (ret)
-		dev_err("__mxt_read_reg() failed: %04x\n", ret);
+		dev_err("__mxt_read_reg(%04x, %04x, %04x) failed: %04x\n", reg, len, (unsigned int) val, ret);
 
 	return ret;
 }
@@ -671,7 +684,7 @@ int __mxt_read_reg(u16 reg, u16 len, void *val){
 int __mxt_write_reg(u16 reg, u16 len, const void *val){
 	int ret;
 
-	ret = i2c_send(reg, (u8*) val, len);
+	ret = i2c_send(reg, val, len);
 	if (ret)
 		dev_err("__mxt_write_reg() failed: %04x\n", ret);
 
@@ -693,6 +706,7 @@ int mxt_write_obj_instance(struct mxt_data *data, u8 type, u8 instance, u8 offse
 }
 
 int mxt_write_object(struct mxt_data *data, u8 type, u8 offset, u8 val){
+	
 	return mxt_write_obj_instance(data, type, 0, offset, val);
 }
 

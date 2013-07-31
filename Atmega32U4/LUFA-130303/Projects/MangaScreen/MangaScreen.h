@@ -49,14 +49,14 @@
 		#include "EEPROM.h"
 
 		#include <LUFA/Drivers/Board/LEDs.h>
-		#include <LUFA/Drivers/Board/Joystick.h>
+		//#include <LUFA/Drivers/Board/Joystick.h>
 		#include <LUFA/Drivers/Board/Buttons.h>
 		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include <LUFA/Drivers/USB/USB.h>
 
 		#define dev_err(format, arg...) printf(format , ## arg)
 		#define dev_info(format, arg...) printf(format , ## arg)
-		#define dev_dbg(format, arg...) printf(format , ## arg)
+		#define dev_dbg(format, arg...) //printf(format , ## arg)
 		#define dev_warn(format, arg...) printf(format , ## arg)
 
 
@@ -101,8 +101,6 @@
 		void HandleDigitizer(void);
 		void HandleEEPROM(void);
 		int execute_command(void);
-
-		void input_sync(USB_DigitizerReport_Data_t* DigitizerReport);
 
 		int putchar_printf(char var, FILE *stream);
 

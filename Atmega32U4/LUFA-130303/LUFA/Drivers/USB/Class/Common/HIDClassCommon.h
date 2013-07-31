@@ -545,6 +545,42 @@
 			HID_RI_END_COLLECTION(0)
 
 
+		#define HID_DESCRIPTOR_DIGITIZER_MT()               \
+			HID_RI_USAGE_PAGE(8, 0x0d),                     \
+			HID_RI_USAGE(8, 0x04),                          \
+			HID_RI_COLLECTION(8, 0x01),                     \
+				HID_RI_REPORTID_MTOUCH()				    \
+				HID_RI_USAGE(8, 0x22),                      \
+				HID_RI_COLLECTION(8, 0x02),                 \
+					HID_RI_USAGE(8, 0x42),                  \
+					HID_RI_LOGICAL_MINIMUM(8, 0x00),        \
+					HID_RI_LOGICAL_MAXIMUM(8, 0x01),        \
+					HID_RI_REPORT_SIZE(8, 0x01),            \
+					HID_RI_REPORT_COUNT(8, 0x01),           \
+            		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+            		HID_RI_USAGE(8, 0x32),                  \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+			        HID_RI_REPORT_COUNT(8, 0x06),              \
+			        HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_ARRAY | HID_IOF_ABSOLUTE), \
+			        HID_RI_REPORT_SIZE(8, 0x08),            \
+			        HID_RI_USAGE(8, 0x51),                  \
+			        HID_RI_REPORT_COUNT(8, 0x01),           \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+			        HID_RI_USAGE_PAGE(8, 0x01),             \
+			        HID_RI_LOGICAL_MAXIMUM(16, 0xfff),      \
+			        HID_RI_REPORT_SIZE(8, 0x10),            \
+			        HID_RI_UNIT_EXPONENT(8, 0x0e),          \
+			        HID_RI_UNIT(8, 0x33),                   \
+			        HID_RI_USAGE(8, 0x30),                  \
+			        HID_RI_PHYSICAL_MINIMUM(8, 0),          \
+			        HID_RI_PHYSICAL_MAXIMUM(16, 0x45b),     \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+			        HID_RI_PHYSICAL_MAXIMUM(16, 0x38a),     \
+			        HID_RI_USAGE(8, 0x31),                  \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+				HID_RI_END_COLLECTION(0),                   \
+			HID_RI_END_COLLECTION(0)
+
 		/** \hideinitializer
 		 *  A list of HID report item array elements that describe a typical Vendor Defined byte array HID report descriptor,
 		 *  used for transporting arbitrary data between the USB host and device via HID reports. The resulting report should be

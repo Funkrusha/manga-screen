@@ -468,7 +468,8 @@ struct mxt_data {
 
 
 int Digitizer_Init(void);
-int Digitizer_get_report(void);
+//int Digitizer_get_report(void);
+int Digitizer_get_report(USB_DigitizerReport_Data_t* DigitizerReport);
 
 bool mxt_object_writable(unsigned int type);
 void mxt_dump_message(struct mxt_message *message);
