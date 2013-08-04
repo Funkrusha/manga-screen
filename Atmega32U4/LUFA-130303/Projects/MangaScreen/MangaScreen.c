@@ -120,9 +120,7 @@ int main(void){
 	GlobalInterruptEnable();
 
 	for (;;){
-		HandleSerial();		
-		//HandleDigitizer();
-
+		HandleSerial();				
 		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 		HID_Device_USBTask(&Digitizer_HID_Interface);
 		USB_USBTask();
@@ -140,8 +138,10 @@ void SetupHardware(void){
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
 
-	/* Hardware Initialization */
-	LEDs_Init();
+	/* Backlight comes on early to suppress the full on blink. */
+	BL_on(128);		
+
+	/* Set up USB */	
 	USB_Init();
 
 	ret = EEPROM_Init();
@@ -152,16 +152,19 @@ void SetupHardware(void){
 	if(ret)
 		dev_err("LCD error: %x\n", ret);
 
-	//ret = Digitizer_Init();
-	//if(ret)
-	//	dev_err("Digitizer error: %x\n", ret);
-
-	BL_on(128);		
+	ret = Digitizer_Init();
+	if(ret)
+		dev_err("Digitizer error: %x\n", ret);
 		
 	DDRC  |= PIN_PD;  // Powerdown 
 	PORTC |= PIN_PD;  // High for normal operation
 	DDRB  |= PIN_PDO; // Powerdown outputs
 	PORTB |= PIN_PDO; // High for normal operation
+
+	/* Init the LEDs now to show that the hardware init has gone ok */	
+	LEDs_Init();
+	
+	printf(">");
 }
 
 
@@ -183,7 +186,7 @@ void HandleSerial(void){
 		int16_t c = RingBuffer_Remove(&FromHost_Buffer);
 		
 		if(c == '\n' || c == '\r'){
-			if(cmd_cnt > 0 && (cmd[cmd_cnt-1] == '\n'))
+			if(cmd_cnt > 0 && (cmd[cmd_cnt-1] == '\n' || cmd[cmd_cnt-1] == '\r'))
 				cmd_cnt--;
 			cmd[cmd_cnt] = 0;			
 			err = execute_command();
@@ -205,23 +208,28 @@ int putchar_printf(char var, FILE *stream) {
 
 /** Execute a command received via virtual serial */
 int execute_command(void){
-	if(strcmp(cmd, "help") == 0)
-		printf("No help here, google it!\n");
-	else if(strcmp(cmd, "init") == 0){
-		printf("Initializing digitizer..\n");
-		Digitizer_Init();
-		printf("Done!\n");
+	int val;
+
+	if(strcmp(cmd, "set display on") == 0){
+		LCD_Init();
 	}
-	else if(strcmp(cmd, "raport") == 0){
-		printf("Get raport\n");
-		Digitizer_get_report(DigitizerReport);
-		printf("Done!\n");
+	else if(strcmp(cmd, "set display off") == 0){
+		LCD_UnInit();
 	}
-	else if(strcmp(cmd, "enable") == 0){
-		printf("Enable raporting\n");
-		enable_reports = true;
-		printf("Done!\n");
+	else if(strncmp(cmd, "set backlight ", 14) == 0){
+		val = atoi(cmd+14);
+		if(val >= 0 && val <= 255)
+			BL_on(val);
+		else
+			printf("Value out of range: %d. Valid range is 0 to 255\n", val);
 	}
+	else{
+		printf("Unknown comand\n");
+		printf("List of commands:\n");
+		printf("set backlight <0..255>\n");
+		printf("set display <on/off>\n");
+	}
+
 	printf(">");
 
 	return 0;
@@ -278,7 +286,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 
 	USB_DigitizerReport_Data_t* DigitizerReport = (USB_DigitizerReport_Data_t*)ReportData;
-	if(enable_reports)
+	//if(enable_reports)
 		Digitizer_get_report(DigitizerReport);
     *ReportSize = sizeof(USB_DigitizerReport_Data_t);
     return true;

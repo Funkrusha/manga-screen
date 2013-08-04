@@ -501,8 +501,8 @@
 		 *  \code
          *  typedef struct 
          *  { 
-         *      uint8_t Finger; 
-         *      uint8_t Temp; 
+         *      uint8_t Tip_switch; 
+         *      uint8_t In_Range; 
          *      int16_t X;    
          *      int16_t Y; 
          *  } USB_Digitizer_Report;
@@ -544,40 +544,59 @@
 				HID_RI_END_COLLECTION(0),                   \
 			HID_RI_END_COLLECTION(0)
 
+		/** \hideinitializer
 
+
+		 *  A list of HID report item array elements that describe a typical HID USB digitizer. 
+		 *
+		 *  The report is structured according to the following layout:
+		 *
+
+		 *  \code
+         *  typedef struct 
+         *  { 
+         *      uint8_t Tip_switch; 
+         *      uint8_t In_Range; 
+				uint8_t Contact_identifier;
+				uint8_t Pressure;
+         *      int16_t X;    
+         *      int16_t Y; 
+         *  } USB_Digitizer_Report;
+		 *  \endcode
+		 *
+		 */
 		#define HID_DESCRIPTOR_DIGITIZER_MT()               \
 			HID_RI_USAGE_PAGE(8, 0x0d),                     \
 			HID_RI_USAGE(8, 0x04),                          \
 			HID_RI_COLLECTION(8, 0x01),                     \
-				HID_RI_REPORTID_MTOUCH()				    \
 				HID_RI_USAGE(8, 0x22),                      \
 				HID_RI_COLLECTION(8, 0x02),                 \
 					HID_RI_USAGE(8, 0x42),                  \
-					HID_RI_LOGICAL_MINIMUM(8, 0x00),        \
-					HID_RI_LOGICAL_MAXIMUM(8, 0x01),        \
 					HID_RI_REPORT_SIZE(8, 0x01),            \
 					HID_RI_REPORT_COUNT(8, 0x01),           \
             		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
             		HID_RI_USAGE(8, 0x32),                  \
+					HID_RI_REPORT_SIZE(8, 0x01),            \
+					HID_RI_REPORT_COUNT(8, 0x01),           \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_REPORT_COUNT(8, 0x06),              \
-			        HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_ARRAY | HID_IOF_ABSOLUTE), \
-			        HID_RI_REPORT_SIZE(8, 0x08),            \
 			        HID_RI_USAGE(8, 0x51),                  \
-			        HID_RI_REPORT_COUNT(8, 0x01),           \
+					HID_RI_REPORT_SIZE(8, 0x01),            \
+					HID_RI_REPORT_COUNT(8, 0x01),           \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_USAGE_PAGE(8, 0x01),             \
-			        HID_RI_LOGICAL_MAXIMUM(16, 0xfff),      \
-			        HID_RI_REPORT_SIZE(8, 0x10),            \
-			        HID_RI_UNIT_EXPONENT(8, 0x0e),          \
-			        HID_RI_UNIT(8, 0x33),                   \
 			        HID_RI_USAGE(8, 0x30),                  \
-			        HID_RI_PHYSICAL_MINIMUM(8, 0),          \
-			        HID_RI_PHYSICAL_MAXIMUM(16, 0x45b),     \
+					HID_RI_REPORT_SIZE(8, 0x01),            \
+					HID_RI_REPORT_COUNT(8, 0x01),           \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_PHYSICAL_MAXIMUM(16, 0x38a),     \
-			        HID_RI_USAGE(8, 0x31),                  \
-			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+					HID_RI_USAGE_PAGE(8, 0x01),             \
+					HID_RI_USAGE(8, 0x30),                  \
+					HID_RI_USAGE(8, 0x31),                  \
+					HID_RI_LOGICAL_MINIMUM(16, 0x0000), 	\
+					HID_RI_LOGICAL_MAXIMUM(16, 0xFFFF), 	\
+					HID_RI_PHYSICAL_MINIMUM(16, 0x0000), 	\
+					HID_RI_PHYSICAL_MAXIMUM(16, 0xFFFF), 	\
+					HID_RI_REPORT_COUNT(8, 2),           	\
+					HID_RI_REPORT_SIZE(8, 16), 				\
+					HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
 				HID_RI_END_COLLECTION(0),                   \
 			HID_RI_END_COLLECTION(0)
 
@@ -723,8 +742,17 @@
          int16_t X;    
          int16_t Y;
 		} ATTR_PACKED USB_DigitizerReport_Data_t;
-	
-		
+		/*
+		typedef struct 
+      	{ 
+         	uint8_t Tip_switch; 
+         	uint8_t In_Range; 
+			uint8_t Contact_identifier;
+			uint8_t Pressure;
+	        int16_t X;    
+    	    int16_t Y;
+		} ATTR_PACKED USB_DigitizerReport_Data_t;
+		*/
 		
 		/** \brief Standard HID Boot Protocol Mouse Report.
 		 *

@@ -216,9 +216,6 @@ char LcdRead(char cs){
 	return data;
 }
 
-void BL_off(){
-}
-
 /* Setup PWM on pin PD7, see page 162 in the Datasheet */
 void BL_on(char duty){
 	TCCR4B = (0<<PWM4X)  | (0<<PSR4) | (0<<DTPS41) | (0<<DTPS40) | (1<<CS43) | (0<<CS42) | (0<<CS41) | (1<<CS40); 
@@ -227,7 +224,7 @@ void BL_on(char duty){
 	TCCR4E = (0<<TLOCK4) | (0<<ENHC4) | (0<<OC4OE5) | (0<<OC4OE4) | (0<<OC4OE3) | (0<<OC4OE2) | (0<<OC4OE1) | (0<<OC4OE0); 
 
 	OCR4C = 0xFF;		// Top value of counter 
-   	OCR4D = duty; 		//set 75% duty cycle 
+   	OCR4D = (0xFF-duty); 		//set 75% duty cycle 
 }
 
 /* Translate a byte to a hex string */

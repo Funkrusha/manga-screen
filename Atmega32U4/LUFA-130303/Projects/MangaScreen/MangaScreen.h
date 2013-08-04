@@ -56,7 +56,7 @@
 
 		#define dev_err(format, arg...) printf(format , ## arg)
 		#define dev_info(format, arg...) printf(format , ## arg)
-		#define dev_dbg(format, arg...) //printf(format , ## arg)
+		#define dev_dbg(format, arg...) printf(format , ## arg)
 		#define dev_warn(format, arg...) printf(format , ## arg)
 
 

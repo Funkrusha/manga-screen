@@ -44,19 +44,19 @@ void DisableI2CInterrupt(){
 /* This routine is run when a 0->1 transition occurs on PB3 */
 ISR(INT3_vect){
 	char cond; 
-	if((cond = (char) I2C_get_byte(&c_addr, 1)) != 0){ 				// Receive the address 0x50 + R/W bit
+	if((cond = (char) I2C_get_byte(&c_addr, 1)) != 0){ 	// Receive the address 0x50 + R/W bit
 		return;
 	}
 
-	if((c_addr >> 1) != 0x50){ 						// This is not for us
+	if((c_addr >> 1) != 0x50){ 							// This is not for us
 		return; 
 		
 	}
-	if(c_addr & 0x01){ 	 							// This is a read operation 
+	if(c_addr & 0x01){ 	 								// This is a read operation 
 		while(1){
 			cond = I2C_put_byte(edid[read_addr]);
 			read_addr++;
-			if(read_addr > 128)						// Cap that beach, yo. 
+			if(read_addr > 128)							// Cap that beach, yo. 
 				read_addr = 128;
 			if(cond == COND_ACK)
 				continue;			
@@ -82,7 +82,7 @@ void I2C_Init(){
 // Wait for Start, stop or none-condition 
 int wait_for_condition(int timeout){
 	int before = (PIND & SDA);
-	while((PIND & SCL) && timeout--){
+	while((PIND & SCL) && timeout--){	
 		if((PIND & SDA) != before){
 			if((PIND & SDA) == 0)
 				return COND_START;
@@ -111,7 +111,7 @@ int I2C_get_byte(char *data, int ack){
 		sync(0, 30);						// Sync on rising
 		HPD;								// Wait a half period		
 		*data |= (((PIND & SDA)?1:0)<<i);	// Set the data
-		cond = wait_for_condition(40);		// Wait for cond or dropping pin 
+		cond = wait_for_condition(100);		// Wait for cond or dropping pin 
 		if(cond != COND_NONE)
 			return cond;
 		HPD;
@@ -119,8 +119,8 @@ int I2C_get_byte(char *data, int ack){
 
 	if(ack)
 		DDRD  |=  SDA; 		// Make SDA output
-	sync(0, 30);			// Sync on rising
-	sync(SCL, 30); 			// Sync on falling
+	sync(0, 100);			// Sync on rising
+	sync(SCL, 100); 		// Sync on falling
 	QPD;					// Wait
 	DDRD  &= ~SDA; 			// Release the ACk
 	return 0;
@@ -137,7 +137,7 @@ int I2C_put_byte(char data){
 			DDRD &= ~SDA;				// Input
 		else
 			DDRD  |=  SDA; 				// output
-		sync(0, 30); 					// Sync on rising SCK edge
+		sync(0, 100); 					// Sync on rising SCK edge
 		cond = wait_for_condition(27);	// Sync on falling edge
 		if(cond != COND_NONE){
 			DDRD  &= ~SDA; 				// input

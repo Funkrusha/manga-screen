@@ -48,6 +48,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM DigitizerReport[] =
 {
 	//HID_DESCRIPTOR_MOUSE(-1, 1, -1, 1, 3, false)
 	HID_DESCRIPTOR_DIGITIZER()
+	//HID_DESCRIPTOR_DIGITIZER_MT()
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -68,8 +69,8 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	//.VendorID               = 0x0dfc,
 	//.ProductID              = 0x0001,
-	.VendorID               = 0x03EB, 
-	.ProductID              = 0x2062,
+	.VendorID               = 0x03EB,
+	.ProductID              = 0x20FF,
 
 	.ReleaseNumber          = VERSION_BCD(00.01),
 

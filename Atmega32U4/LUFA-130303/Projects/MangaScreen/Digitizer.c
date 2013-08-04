@@ -221,19 +221,20 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	//			   status & MXT_DETECT);
 	data->current_id[id] = status & MXT_DETECT;
 
-	if (status & MXT_DETECT) {
-		data->report->X = x;
-		data->report->Y = y;
-		//report->Pressure = pressure;
-		data->report->Finger = id;
-		data->report->Temp = touch_major;
 
-		//input_report_abs(input_dev, ABS_MT_POSITION_X, x);
-		//input_report_abs(input_dev, ABS_MT_POSITION_Y, y);
-		//input_report_abs(input_dev, ABS_MT_PRESSURE, pressure);
-		//input_report_abs(input_dev, ABS_MT_TOUCH_MAJOR, touch_major);
-		/* TODO: Use vector to report ORIENTATION & TOUCH_MINOR */
-	}
+	data->report->Finger    		 = status;
+	data->report->Temp			 	 = pressure;
+	data->report->X 				 = x;
+	data->report->Y 				 = y;
+
+
+	/*data->report->Tip_switch 		 = status;
+	data->report->In_Range 			 = (u8) 1;
+	data->report->Contact_identifier = (u8) id;
+	data->report->Pressure			 = (u8) pressure;
+	data->report->X 				 = x;
+	data->report->Y 				 = y;
+	*/
 }
 
 void mxt_input_button(struct mxt_data *data, struct mxt_message *message){
