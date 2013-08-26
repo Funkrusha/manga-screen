@@ -47,6 +47,8 @@ int Digitizer_Init(void){
 		return -ENOMEM;
 	}
 
+	data->initialized = false;
+
 	pdata->x_line			= 18;
 	pdata->y_line			= 11;
 	pdata->x_size			= 1024;
@@ -77,6 +79,8 @@ int Digitizer_Init(void){
 	if (err)
 		dev_warn("error making device report status.\n");
 
+	data->initialized = true;
+
 	return 0;
 }
 
@@ -85,6 +89,11 @@ int Digitizer_get_report(USB_DigitizerReport_Data_t* DigitizerReport){
 	int ret;
 
 	data->report = DigitizerReport;
+	if(!data->initialized){
+		//dev_err("Digitizer is not initlialized = %x\n", ret);
+		return -1;
+	}
+
 	ret = mxt_handle_messages(data, true);
 	if (ret)
 		dev_err("Failed to get Digitizer report. Err = %x\n", ret);

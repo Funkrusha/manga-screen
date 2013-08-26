@@ -139,7 +139,7 @@ void SetupHardware(void){
 	clock_prescale_set(clock_div_1);
 
 	/* Backlight comes on early to suppress the full on blink. */
-	BL_on(128);		
+	BL_on(0);		
 
 	/* Set up USB */	
 	USB_Init();
@@ -151,6 +151,8 @@ void SetupHardware(void){
 	ret = LCD_Init();
 	if(ret)
 		dev_err("LCD error: %x\n", ret);
+	
+	_delay_ms(100);
 
 	ret = Digitizer_Init();
 	if(ret)
@@ -161,9 +163,13 @@ void SetupHardware(void){
 	DDRB  |= PIN_PDO; // Powerdown outputs
 	PORTB |= PIN_PDO; // High for normal operation
 
+	/* Now we can turn on BL */
+	BL_on(128);		
+
 	/* Init the LEDs now to show that the hardware init has gone ok */	
 	LEDs_Init();
 	
+
 	printf(">");
 }
 
@@ -208,7 +214,7 @@ int putchar_printf(char var, FILE *stream) {
 
 /** Execute a command received via virtual serial */
 int execute_command(void){
-	int val;
+	int val, ret;
 
 	if(strcmp(cmd, "set display on") == 0){
 		LCD_Init();
@@ -222,6 +228,11 @@ int execute_command(void){
 			BL_on(val);
 		else
 			printf("Value out of range: %d. Valid range is 0 to 255\n", val);
+	}
+	else if(strcmp(cmd, "init") == 0){
+		ret = Digitizer_Init();
+		if(ret)
+			dev_err("Digitizer error: %x\n", ret);
 	}
 	else{
 		printf("Unknown comand\n");

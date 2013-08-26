@@ -390,6 +390,7 @@ struct mxt_data {
 	struct mxt_object *object_table;
 	struct mxt_info info;
 	bool is_tp;
+	bool initialized; 
 
 	unsigned int irq;
 	unsigned int max_x;
