@@ -230,12 +230,18 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	//			   status & MXT_DETECT);
 	data->current_id[id] = status & MXT_DETECT;
 
-
+    data->report->Tip_and_InRange       = (status & MXT_RELEASE) ? 0x00 : 0xff; 
+	data->report->Contact_identifier    = id;
+	data->report->Contact_count_max     = 5;	
+	data->report->X 				    = x;
+	data->report->Y 				    = y;
+	
+	/*	 	  
 	data->report->Finger    		 = status;
 	data->report->Temp			 	 = pressure;
 	data->report->X 				 = x;
 	data->report->Y 				 = y;
-
+*/
 
 	/*data->report->Tip_switch 		 = status;
 	data->report->In_Range 			 = (u8) 1;

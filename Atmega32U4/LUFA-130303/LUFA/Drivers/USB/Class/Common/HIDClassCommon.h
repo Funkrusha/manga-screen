@@ -496,13 +496,15 @@
 
 		 *  A list of HID report item array elements that describe a typical HID USB digitizer. 
 		 *
+
 		 *  The report is structured according to the following layout:
 		 *
 		 *  \code
          *  typedef struct 
          *  { 
-         *      uint8_t Tip_switch; 
-         *      uint8_t In_Range; 
+         *      uint8_t Tip_and_InRange; 
+		 *		uint8_t Contact_identifier;
+		 *		uint8_t Contact_count_max;		 
          *      int16_t X;    
          *      int16_t Y; 
          *  } USB_Digitizer_Report;
@@ -529,6 +531,8 @@
 			        HID_RI_USAGE(8, 0x51),                  \
 			        HID_RI_REPORT_COUNT(8, 0x01),           \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+			        HID_RI_USAGE(8, 0x55),                  \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
 			        HID_RI_USAGE_PAGE(8, 0x01),             \
 			        HID_RI_LOGICAL_MAXIMUM(16, 0xfff),      \
 			        HID_RI_REPORT_SIZE(8, 0x10),            \
@@ -551,14 +555,10 @@
 		 *
 		 *  The report is structured according to the following layout:
 		 *
-
 		 *  \code
          *  typedef struct 
          *  { 
-         *      uint8_t Tip_switch; 
-         *      uint8_t In_Range; 
-				uint8_t Contact_identifier;
-				uint8_t Pressure;
+         *      ....
          *      int16_t X;    
          *      int16_t Y; 
          *  } USB_Digitizer_Report;
@@ -735,6 +735,16 @@
 		 *
 		 *  Type define for a digitizer report
 		 */
+		 typedef struct 
+         { 
+              uint8_t Tip_and_InRange; 
+		 	  uint8_t Contact_identifier;
+		 	  uint8_t Contact_count_max;		 
+              int16_t X;    
+              int16_t Y; 
+         } ATTR_PACKED USB_DigitizerReport_Data_t;
+         
+        /* 
 		typedef struct 
       	{ 
          uint8_t Finger; 
@@ -742,6 +752,8 @@
          int16_t X;    
          int16_t Y;
 		} ATTR_PACKED USB_DigitizerReport_Data_t;
+		*/
+		
 		/*
 		typedef struct 
       	{ 
