@@ -503,6 +503,7 @@
          *  typedef struct 
          *  { 
          *      uint8_t Tip_and_InRange; 
+         *      uint8_t Pressure; 
 		 *		uint8_t Contact_identifier;
 		 *		uint8_t Contact_count_max;		 
          *      int16_t X;    
@@ -528,8 +529,10 @@
 			        HID_RI_REPORT_COUNT(8, 0x06),              \
 			        HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_ARRAY | HID_IOF_ABSOLUTE), \
 			        HID_RI_REPORT_SIZE(8, 0x08),            \
-			        HID_RI_USAGE(8, 0x51),                  \
 			        HID_RI_REPORT_COUNT(8, 0x01),           \
+			        HID_RI_USAGE(8, 0x30),                  \
+			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
+			        HID_RI_USAGE(8, 0x51),                  \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
 			        HID_RI_USAGE(8, 0x55),                  \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
@@ -738,6 +741,7 @@
 		 typedef struct 
          { 
               uint8_t Tip_and_InRange; 
+              uint8_t Pressure; 
 		 	  uint8_t Contact_identifier;
 		 	  uint8_t Contact_count_max;		 
               int16_t X;    

@@ -147,8 +147,7 @@ int mxt_proc_messages(struct mxt_data *data, u8 count, bool report){
 			const u32 *payload = (u32*) &msg->message[0];
 			u8 status = payload[0];
 			data->config_csum = mxt_extract_T6_csum(&payload[1]);
-			dev_dbg("Status: %02x Config Checksum: %08lx\n",
-				status, data->config_csum);
+			//dev_dbg("Status: %02x Config Checksum: %08lx\n", status, data->config_csum);
 			//if (status == 0x00)
 			//	complete(&data->auto_cal_completion);
 		} else if (mxt_is_T9_message(data, msg)) {
@@ -213,7 +212,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	vector1 = (signed)((signed char)message->message[6]) >> 4;
 	vector2 = (signed)((signed char)(message->message[6] << 4)) >> 4;
 
-	dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
+	/*dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
 		id,
 		(status & MXT_DETECT) ? 'D' : '.',
 		(status & MXT_PRESS) ? 'P' : '.',
@@ -223,7 +222,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 		(status & MXT_AMP) ? 'A' : '.',
 		(status & MXT_SUPPRESS) ? 'S' : '.',
 		(status & MXT_UNGRIP) ? 'U' : '.',
-		x, y, area, pressure, vector1, vector2);
+		x, y, area, pressure, vector1, vector2);*/
 
 	//input_mt_slot(input_dev, id);
 	//input_mt_report_slot_state(input_dev, MT_TOOL_FINGER,
@@ -231,8 +230,9 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	data->current_id[id] = status & MXT_DETECT;
 
     data->report->Tip_and_InRange       = (status & MXT_RELEASE) ? 0x00 : 0xff; 
+    data->report->Pressure              = pressure;
 	data->report->Contact_identifier    = id;
-	data->report->Contact_count_max     = 5;	
+	data->report->Contact_count_max     = 4;	
 	data->report->X 				    = x;
 	data->report->Y 				    = y;
 	
@@ -260,7 +260,7 @@ void mxt_input_button(struct mxt_data *data, struct mxt_message *message){
 	/* Active-low switch */
 	button = !(message->message[0] & MXT_GPIO3_MASK);
 	//input_report_key(input, BTN_LEFT, button);
-	dev_dbg("Button state: %d\n", button);
+	//dev_dbg("Button state: %d\n", button);
 }
 
 
@@ -320,7 +320,7 @@ bool mxt_object_writable(unsigned int type){
 }
 
 void mxt_dump_message(struct mxt_message *message){
-	dev_dbg("reportid: %u\tmessage: %*ph\n", message->reportid, 7, message->message);
+	//dev_dbg("reportid: %u\tmessage: %*ph\n", message->reportid, 7, message->message);
 }
 
 
@@ -488,11 +488,11 @@ int mxt_get_object_table(struct mxt_data *data){
 			max_id = 0;
 		}
 
-		dev_dbg("Type %2d, ", 		object->type);
-		dev_dbg("Start %3d, ", 		object->start_address);
-		dev_dbg("Size %3d, ", 		mxt_obj_size(object));
-		dev_dbg("Instances %2u, ", mxt_obj_instances(object));
-		dev_dbg("ReportIDs %3u : %3u\n", min_id, max_id);
+		//dev_dbg("Type %2d, ", 		object->type);
+		//dev_dbg("Start %3d, ", 		object->start_address);
+		//dev_dbg("Size %3d, ", 		mxt_obj_size(object));
+		//dev_dbg("Instances %2u, ", mxt_obj_instances(object));
+		//dev_dbg("ReportIDs %3u : %3u\n", min_id, max_id);
 
 		switch (object->type) {
 		case MXT_GEN_MESSAGE_T5:
