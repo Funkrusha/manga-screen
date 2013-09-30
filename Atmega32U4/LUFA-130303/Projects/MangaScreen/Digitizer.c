@@ -212,7 +212,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	vector1 = (signed)((signed char)message->message[6]) >> 4;
 	vector2 = (signed)((signed char)(message->message[6] << 4)) >> 4;
 
-	/*dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
+	dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
 		id,
 		(status & MXT_DETECT) ? 'D' : '.',
 		(status & MXT_PRESS) ? 'P' : '.',
@@ -222,19 +222,21 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 		(status & MXT_AMP) ? 'A' : '.',
 		(status & MXT_SUPPRESS) ? 'S' : '.',
 		(status & MXT_UNGRIP) ? 'U' : '.',
-		x, y, area, pressure, vector1, vector2);*/
+		x, y, area, pressure, vector1, vector2);
 
 	//input_mt_slot(input_dev, id);
 	//input_mt_report_slot_state(input_dev, MT_TOOL_FINGER,
 	//			   status & MXT_DETECT);
 	data->current_id[id] = status & MXT_DETECT;
 
-    data->report->Tip_and_InRange       = (status & MXT_RELEASE) ? 0x00 : 0xff; 
+    data->report->Tip_and_InRange       = (status & MXT_RELEASE) ? 0x00 : 0x03; 
     data->report->Pressure              = pressure;
 	data->report->Contact_identifier    = id;
 	data->report->Contact_count_max     = 4;	
 	data->report->X 				    = x;
 	data->report->Y 				    = y;
+	
+	dev_dbg("Tip_and_InRange: %d\n", data->report->Tip_and_InRange);
 	
 	/*	 	  
 	data->report->Finger    		 = status;
@@ -244,7 +246,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 */
 
 	/*data->report->Tip_switch 		 = status;
-	data->report->In_Range 			 = (u8) 1;
+	data->report->In_Range 			 = (u1) 8;
 	data->report->Contact_identifier = (u8) id;
 	data->report->Pressure			 = (u8) pressure;
 	data->report->X 				 = x;
@@ -252,17 +254,18 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	*/
 }
 
+/*
 void mxt_input_button(struct mxt_data *data, struct mxt_message *message){
 	//struct device *dev = &data->client->dev;
 	//struct input_dev *input = data->input_dev;
 	bool button;
 
-	/* Active-low switch */
+	// Active-low switch
 	button = !(message->message[0] & MXT_GPIO3_MASK);
 	//input_report_key(input, BTN_LEFT, button);
 	//dev_dbg("Button state: %d\n", button);
 }
-
+*/
 
 
 /* Main method called for getting data */
@@ -276,9 +279,9 @@ int mxt_handle_messages(struct mxt_data *data, bool report){
 		return ret;
 	}
 
-	if (count > 0)
+	if (count > 0) {
 		ret = mxt_proc_messages(data, count, report);
-
+    }
 	return ret;
 }
 
