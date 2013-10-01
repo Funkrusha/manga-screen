@@ -297,9 +297,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 
 	USB_DigitizerReport_Data_t* DigitizerReport = (USB_DigitizerReport_Data_t*)ReportData;
+	
 	//if(enable_reports)
-		Digitizer_get_report(DigitizerReport);
-    *ReportSize = sizeof(USB_DigitizerReport_Data_t);
+	if (Digitizer_get_report(DigitizerReport))
+	    *ReportSize = 0;
+    else
+        *ReportSize = sizeof(USB_DigitizerReport_Data_t);
+    
+    //dev_dbg("HIDReport size: %d\n", *ReportSize);
     return true;
 }
 

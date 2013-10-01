@@ -95,10 +95,10 @@ int Digitizer_get_report(USB_DigitizerReport_Data_t* DigitizerReport){
 	}
 
 	ret = mxt_handle_messages(data, true);
-	if (ret)
-		dev_err("Failed to get Digitizer report. Err = %x\n", ret);
+	//if (ret)
+		//dev_err("Failed to get Digitizer report. Err = %x\n", ret);
 
-	return 0;
+	return ret;
 }
 
 
@@ -212,7 +212,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	vector1 = (signed)((signed char)message->message[6]) >> 4;
 	vector2 = (signed)((signed char)(message->message[6] << 4)) >> 4;
 
-	dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
+	/*dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
 		id,
 		(status & MXT_DETECT) ? 'D' : '.',
 		(status & MXT_PRESS) ? 'P' : '.',
@@ -223,6 +223,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 		(status & MXT_SUPPRESS) ? 'S' : '.',
 		(status & MXT_UNGRIP) ? 'U' : '.',
 		x, y, area, pressure, vector1, vector2);
+*/
 
 	//input_mt_slot(input_dev, id);
 	//input_mt_report_slot_state(input_dev, MT_TOOL_FINGER,
@@ -236,7 +237,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	data->report->X 				    = x;
 	data->report->Y 				    = y;
 	
-	dev_dbg("Tip_and_InRange: %d\n", data->report->Tip_and_InRange);
+	//dev_dbg("Tip_and_InRange: %d\n", data->report->Tip_and_InRange);
 	
 	/*	 	  
 	data->report->Finger    		 = status;
@@ -282,6 +283,10 @@ int mxt_handle_messages(struct mxt_data *data, bool report){
 	if (count > 0) {
 		ret = mxt_proc_messages(data, count, report);
     }
+	else {
+	    //dev_dbg("No messages\n");
+	    return -1;
+	}
 	return ret;
 }
 
