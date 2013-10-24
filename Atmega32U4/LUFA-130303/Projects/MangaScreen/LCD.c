@@ -10,9 +10,9 @@ int LCD_Init(void){
 	DDRB &= ~PIN_MISO;  // PB3
 	DDRB |=  PIN_ST; 	// PB4
 	DDRC |=  PIN_PD;	// PC7
-	DDRD |=  PIN_SCDT;	// PD6
-	DDRD |=  PIN_BL;   	// PD7
+	DDRD |=  PIN_SCDT;	// PD6	
 	DDRE |=  PIN_RESET;	// PE6
+	DDRD |=  PIN_BL;   	// PD7
 	
 	PORTE |= PIN_RESET; 	//Reset high				
 	_delay_ms(100); 			// Wait for power to become stable.
@@ -218,6 +218,7 @@ char LcdRead(char cs){
 
 /* Setup PWM on pin PD7, see page 162 in the Datasheet */
 void BL_on(char duty){
+
 	TCCR4B = (0<<PWM4X)  | (0<<PSR4) | (0<<DTPS41) | (0<<DTPS40) | (1<<CS43) | (0<<CS42) | (0<<CS41) | (1<<CS40); 
 	TCCR4C = (1<<COM4D1) | (0<<COM4D0) | (0<<FOC4D) | (1<<PWM4D); 
 	TCCR4D = (0<<WGM41)  | (0<<WGM40); // Count up -mode, Fast PWM if PWM4D == 1

@@ -162,10 +162,10 @@ def make_edid():
     struct.pack_into("B", edid, 37, byte_37)    
 
     # Bytes 38-39 Standard timing
-    struct.pack_into("B", edid, 38, x_res)
-    s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
-    struct.pack_into("B", edid, 39, int(s, 2))
-    for i in range(40, 53):
+    #struct.pack_into("B", edid, 38, x_res)
+    #s = "0b"+bin(pix_rat)[2:].rjust(2, "0")+bin(v_freq)[2:].rjust(6, "0")
+    #struct.pack_into("B", edid, 39, int(s, 2))
+    for i in range(38, 54):
         struct.pack_into("B", edid, i, 0x01)    
 
     # Descriptor 1 (54-71)
@@ -255,6 +255,8 @@ def make_edid():
 print "EDID maker V0.1"
 edid = make_edid()
 
+print len(edid)
+
 f = open("edid.dat", "r+b")
 f.write(edid)
 f.close()
@@ -266,4 +268,4 @@ for i in range(128):
 f.write("};")
 f.close()
 
-print "EDID information written to edid.dat"
+print "EDID information written to edid.dat and edid.c"

@@ -130,6 +130,7 @@ int main(void){
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware(void){
 	int ret;
+	int i;
 
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
@@ -140,6 +141,7 @@ void SetupHardware(void){
 
 	/* Backlight comes on early to suppress the full on blink. */
 	BL_on(0);		
+	_delay_ms(10); // Wait at least 4ms before enabling the output. Not sure why..
 
 	/* Set up USB */	
 	USB_Init();
@@ -152,19 +154,21 @@ void SetupHardware(void){
 	if(ret)
 		dev_err("LCD error: %x\n", ret);
 	
-	_delay_ms(100);
-
 	ret = Digitizer_Init();
 	if(ret)
 		dev_err("Digitizer error: %x\n", ret);
 		
+
 	DDRC  |= PIN_PD;  // Powerdown 
 	PORTC |= PIN_PD;  // High for normal operation
 	DDRB  |= PIN_PDO; // Powerdown outputs
 	PORTB |= PIN_PDO; // High for normal operation
-
+	
 	/* Now we can turn on BL */
-	BL_on(128);		
+	for(i=0; i<255; i++){
+		BL_on(i);		
+		_delay_ms(10);
+	}
 
 	/* Init the LEDs now to show that the hardware init has gone ok */	
 	LEDs_Init();
