@@ -295,7 +295,7 @@ unsigned long int_sqrt(unsigned long x);
 
 /* Touch status */
 #define MXT_UNGRIP		(1 << 0)
-#define MXT_SUPPRESS		(1 << 1)
+#define MXT_SUPPRESS	(1 << 1)
 #define MXT_AMP			(1 << 2)
 #define MXT_VECTOR		(1 << 3)
 #define MXT_MOVE		(1 << 4)

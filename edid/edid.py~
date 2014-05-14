@@ -257,7 +257,7 @@ edid = make_edid()
 
 print len(edid)
 
-f = open("edid.dat", "r+b")
+f = open("edid.dat", "w+b")
 f.write(edid)
 f.close()
 

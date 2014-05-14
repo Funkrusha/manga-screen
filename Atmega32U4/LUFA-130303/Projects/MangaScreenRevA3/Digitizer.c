@@ -76,8 +76,10 @@ int Digitizer_Init(void){
 	 */
 	err = mxt_write_object(data, MXT_GEN_COMMAND_T6,
 				 MXT_COMMAND_REPORTALL, 1);
-	if (err)
+	if (err){
 		dev_warn("error making device report status.\n");
+		return -EIO;	
+	}
 
 	data->initialized = true;
 
@@ -90,13 +92,13 @@ int Digitizer_get_report(USB_DigitizerReport_Data_t* DigitizerReport){
 
 	data->report = DigitizerReport;
 	if(!data->initialized){
-		//dev_err("Digitizer is not initlialized = %x\n", ret);
+		dev_err("Digitizer is not initlialized = %x\n", ret);
 		return -1;
 	}
 
 	ret = mxt_handle_messages(data, true);
-	//if (ret)
-		//dev_err("Failed to get Digitizer report. Err = %x\n", ret);
+	if (ret)
+		dev_err("Failed to get Digitizer report. Err = %x\n", ret);
 
 	return ret;
 }
@@ -123,7 +125,6 @@ bool mxt_is_T9_message(struct mxt_data *data, struct mxt_message *msg){
 
 int mxt_proc_messages(struct mxt_data *data, u8 count, bool report){
 	u8 reportid;
-	//bool update_input = false;
 	struct mxt_message *messages, *msg;
 	int ret;
 
@@ -147,23 +148,18 @@ int mxt_proc_messages(struct mxt_data *data, u8 count, bool report){
 			const u32 *payload = (u32*) &msg->message[0];
 			u8 status = payload[0];
 			data->config_csum = mxt_extract_T6_csum(&payload[1]);
-			//dev_dbg("Status: %02x Config Checksum: %08lx\n", status, data->config_csum);
+			dev_dbg("Status: %02x Config Checksum: %08lx\n", status, data->config_csum);
+            /* TODO: Calibration */
 			//if (status == 0x00)
 			//	complete(&data->auto_cal_completion);
 		} else if (mxt_is_T9_message(data, msg)) {
 			int id = reportid - data->T9_reportid_min;
 			mxt_input_touchevent(data, msg, id);
-			//update_input = true;
 		} else if (msg->reportid == data->T19_reportid) {
+            /* TODO: Buttons */ 
 			//mxt_input_button(data, msg);
-			//update_input = true;
 		}
 	}
-
-	//if (update_input) {
-		//input_mt_report_pointer_emulation(data->input_dev, false);
-		//input_sync(data->report);
-	//}
 
 out:
 	free(messages);
@@ -212,7 +208,7 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 	vector1 = (signed)((signed char)message->message[6]) >> 4;
 	vector2 = (signed)((signed char)(message->message[6] << 4)) >> 4;
 
-	/*dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
+	dev_dbg("[%u] %c%c%c%c%c%c%c%c x: %5u y: %5u area: %3u amp: %3u vector: [%d,%d]\n",
 		id,
 		(status & MXT_DETECT) ? 'D' : '.',
 		(status & MXT_PRESS) ? 'P' : '.',
@@ -223,36 +219,20 @@ void mxt_input_touchevent(struct mxt_data *data, struct mxt_message *message, in
 		(status & MXT_SUPPRESS) ? 'S' : '.',
 		(status & MXT_UNGRIP) ? 'U' : '.',
 		x, y, area, pressure, vector1, vector2);
-*/
+
 
 	//input_mt_slot(input_dev, id);
 	//input_mt_report_slot_state(input_dev, MT_TOOL_FINGER,
 	//			   status & MXT_DETECT);
-	data->current_id[id] = status & MXT_DETECT;
+	//data->current_id[id] = status & MXT_DETECT;
 
-    data->report->Tip_and_InRange       = (status & MXT_RELEASE) ? 0x00 : 0x03; 
+    data->report->Tip_and_InRange       = (status & MXT_PRESS)  ? 0x0 : 0x1;
+    data->report->Tip_and_InRange      |= (status & MXT_DETECT) ? 0x0 : 0x3; 
     data->report->Pressure              = pressure;
-	data->report->Contact_identifier    = id;
-	data->report->Contact_count_max     = 4;	
+    data->report->Contact_identifier    = id;
+	data->report->Contact_count_max     = MXT_MAX_FINGER;	
 	data->report->X 				    = x;
 	data->report->Y 				    = y;
-	
-	//dev_dbg("Tip_and_InRange: %d\n", data->report->Tip_and_InRange);
-	
-	/*	 	  
-	data->report->Finger    		 = status;
-	data->report->Temp			 	 = pressure;
-	data->report->X 				 = x;
-	data->report->Y 				 = y;
-*/
-
-	/*data->report->Tip_switch 		 = status;
-	data->report->In_Range 			 = (u1) 8;
-	data->report->Contact_identifier = (u8) id;
-	data->report->Pressure			 = (u8) pressure;
-	data->report->X 				 = x;
-	data->report->Y 				 = y;
-	*/
 }
 
 /*
@@ -281,11 +261,12 @@ int mxt_handle_messages(struct mxt_data *data, bool report){
 	}
 
 	if (count > 0) {
+		dev_dbg("Processing %d messages\n", count);
 		ret = mxt_proc_messages(data, count, report);
     }
 	else {
 	    //dev_dbg("No messages\n");
-	    return -1;
+	    return 0;
 	}
 	return ret;
 }
@@ -496,11 +477,11 @@ int mxt_get_object_table(struct mxt_data *data){
 			max_id = 0;
 		}
 
-		//dev_dbg("Type %2d, ", 		object->type);
-		//dev_dbg("Start %3d, ", 		object->start_address);
-		//dev_dbg("Size %3d, ", 		mxt_obj_size(object));
-		//dev_dbg("Instances %2u, ", mxt_obj_instances(object));
-		//dev_dbg("ReportIDs %3u : %3u\n", min_id, max_id);
+		dev_dbg("Type %2d, ", 		object->type);
+		dev_dbg("Start %3d, ", 		object->start_address);
+		dev_dbg("Size %3d, ", 		mxt_obj_size(object));
+		dev_dbg("Instances %2u, ", mxt_obj_instances(object));
+		dev_dbg("ReportIDs %3u : %3u\n", min_id, max_id);
 
 		switch (object->type) {
 		case MXT_GEN_MESSAGE_T5:

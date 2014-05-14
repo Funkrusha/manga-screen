@@ -492,10 +492,100 @@
 			HID_RI_END_COLLECTION(0)
 
 
+            #define HID_DG_DIGITIZER        0x000d0001
+            #define HID_DG_PEN              0x000d0002
+            #define HID_DG_LIGHTPEN         0x000d0003
+            #define HID_DG_TOUCHSCREEN      0x000d0004
+            #define HID_DG_TOUCHPAD         0x000d0005
+            #define HID_DG_STYLUS           0x000d0020
+            #define HID_DG_PUCK             0x000d0021
+            #define HID_DG_FINGER           0x000d0022
+            #define HID_DG_TIPPRESSURE      0x000d0030
+            #define HID_DG_BARRELPRESSURE   0x000d0031
+            #define HID_DG_INRANGE          0x000d0032
+            #define HID_DG_TOUCH            0x000d0033
+            #define HID_DG_UNTOUCH          0x000d0034
+            #define HID_DG_TAP              0x000d0035
+            #define HID_DG_TABLETFUNCTIONKEY        0x000d0039
+            #define HID_DG_PROGRAMCHANGEKEY 0x000d003a
+            #define HID_DG_INVERT           0x000d003c
+            #define HID_DG_TIPSWITCH        0x000d0042
+            #define HID_DG_TIPSWITCH2       0x000d0043
+            #define HID_DG_BARRELSWITCH     0x000d0044
+            #define HID_DG_ERASER           0x000d0045
+            #define HID_DG_TABLETPICK       0x000d0046
+
+            #define HID_DG_CONTACTID        0x000d0051
+            #define HID_DG_DEVICEINDEX      0x000d0053
+            #define HID_DG_CONTACTCOUNT     0x000d0054
+            #define HID_DG_CONTACTMAX       0x000d0055
+            
+            #define GENERIC_DESKTOP         0x01
+            #define USAGE_X                 0x30
+            #define USAGE_Y                 0x31
+
+            #define TIP_SWITCH              0x42
+            #define IN_RANGE                0x32
+            #define TIP_PRESSURE            0x30
+            #define CONTACT_ID              0x51
+            #define CONTACT_MAX             0x55
+            
+
 		/** \hideinitializer
 
 		 *  A list of HID report item array elements that describe a typical HID USB digitizer. 
 		 *
+
+            Also, look at this page  http://eleccelerator.com/tutorial-about-usb-hid-report-descriptors/
+    
+            0x05, 0x0d,                         // USAGE_PAGE (Digitizers)
+            0x09, 0x04,                         // USAGE (Touch Screen)
+            0xa1, 0x01,                         // COLLECTION (Application)
+            0x85, REPORTID_MTOUCH,              //   REPORT_ID (Touch)
+            0x09, 0x22,                         //   USAGE (Finger)
+            0xa1, 0x00,                         //   COLLECTION (Physical)
+            0x09, 0x42,                         //     USAGE (Tip Switch)
+            0x15, 0x00,                         //     LOGICAL_MINIMUM (0)
+            0x25, 0x01,                         //     LOGICAL_MAXIMUM (1)
+            0x75, 0x01,                         //     REPORT_SIZE (1)
+            0x95, 0x01,                         //     REPORT_COUNT (1)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x95, 0x03,                         //     REPORT_COUNT (3)
+            0x81, 0x03,                         //     INPUT (Cnst,Ary,Abs)
+            0x09, 0x32,                         //     USAGE (In Range)
+            0x09, 0x47,                         //     USAGE (Confidence)
+            0x95, 0x02,                         //     REPORT_COUNT (2)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x95, 0x0a,                         //     REPORT_COUNT (10)
+            0x81, 0x03,                         //     INPUT (Cnst,Ary,Abs)
+            0x05, 0x01,                         //     USAGE_PAGE (Generic Desk..
+            0x26, 0xff, 0x7f,                   //     LOGICAL_MAXIMUM (32767)
+            0x75, 0x10,                         //     REPORT_SIZE (16)
+            0x95, 0x01,                         //     REPORT_COUNT (1)
+            0x65, 0x00,                         //     UNIT (None)
+            0x09, 0x30,                         //     USAGE (X)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x09, 0x31,                         //     USAGE (Y)
+            0x46, 0x00, 0x00,                   //     PHYSICAL_MAXIMUM (0)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x05, 0x0d,                         //     USAGE PAGE (Digitizers)
+            0x09, 0x48,                         //     USAGE (Width)
+            0x09, 0x49,                         //     USAGE (Height)
+            0x95, 0x01,                         //     REPORT_COUNT (2)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x81, 0x03,                         //     INPUT (Cnst,Ary,Abs)
+            0x09, 0x51,                         //     USAGE (Contact Identifier)
+            0x75, 0x10,                         //     REPORT_SIZE (16) 
+            0x95, 0x02,                         //     REPORT_COUNT (1)
+            0x81, 0x02,                         //     INPUT (Data,Var,Abs)
+            0x09, 0x55,                         //    USAGE(Maximum Count)
+            0x15, 0x00,                         //   LOGICAL_MINIMUM (0)
+            0x25, 0x08,                         //   LOGICAL_MAXIMUM (255)
+            0x75, 0x08,                         //   REPORT_SIZE (8)
+            0x95, 0x01,                         //   REPORT_COUNT (1)
+            0xb1, 0x02,                         //   FEATURE (Data,Var,Abs)
+            0xc0,                               //   END_COLLECTION
+            0xc0,                               // END_COLLECTION
 
 		 *  The report is structured according to the following layout:
 		 *
@@ -518,38 +608,41 @@
 			HID_RI_COLLECTION(8, 0x01),                     \
 				HID_RI_USAGE(8, 0x22),                      \
 				HID_RI_COLLECTION(8, 0x02),                 \
-					HID_RI_USAGE(8, 0x42),                  \
+					HID_RI_USAGE(8, TIP_SWITCH),            \
 					HID_RI_LOGICAL_MINIMUM(8, 0x00),        \
 					HID_RI_LOGICAL_MAXIMUM(8, 0x01),        \
 					HID_RI_REPORT_SIZE(8, 0x01),            \
 					HID_RI_REPORT_COUNT(8, 0x01),           \
             		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-            		HID_RI_USAGE(8, 0x32),                  \
+            		HID_RI_USAGE(8, IN_RANGE),              \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_REPORT_COUNT(8, 0x06),              \
+			        HID_RI_REPORT_COUNT(8, 0x06),           \
 			        HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_ARRAY | HID_IOF_ABSOLUTE), \
 			        HID_RI_REPORT_SIZE(8, 0x08),            \
 			        HID_RI_REPORT_COUNT(8, 0x01),           \
-			        HID_RI_USAGE(8, 0x30),                  \
+			        HID_RI_USAGE(8, TIP_PRESSURE),          \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_USAGE(8, 0x51),                  \
+			        HID_RI_USAGE(8, CONTACT_ID),            \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_USAGE(8, 0x55),                  \
+			        HID_RI_USAGE(8, CONTACT_MAX),           \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
-			        HID_RI_USAGE_PAGE(8, 0x01),             \
+			        HID_RI_USAGE_PAGE(8, GENERIC_DESKTOP),  \
 			        HID_RI_LOGICAL_MAXIMUM(16, 0xfff),      \
 			        HID_RI_REPORT_SIZE(8, 0x10),            \
 			        HID_RI_UNIT_EXPONENT(8, 0x0e),          \
 			        HID_RI_UNIT(8, 0x33),                   \
-			        HID_RI_USAGE(8, 0x30),                  \
+			        HID_RI_USAGE(8, USAGE_X),               \
 			        HID_RI_PHYSICAL_MINIMUM(8, 0),          \
 			        HID_RI_PHYSICAL_MAXIMUM(16, 0x45b),     \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
 			        HID_RI_PHYSICAL_MAXIMUM(16, 0x38a),     \
-			        HID_RI_USAGE(8, 0x31),                  \
+                    HID_RI_LOGICAL_MAXIMUM(16, 0x400),      \
+			        HID_RI_USAGE(8, USAGE_Y),               \
 			        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \
 				HID_RI_END_COLLECTION(0),                   \
 			HID_RI_END_COLLECTION(0)
+
+
 
 		/** \hideinitializer
 
@@ -594,9 +687,9 @@
 					HID_RI_USAGE(8, 0x30),                  \
 					HID_RI_USAGE(8, 0x31),                  \
 					HID_RI_LOGICAL_MINIMUM(16, 0x0000), 	\
-					HID_RI_LOGICAL_MAXIMUM(16, 0xFFFF), 	\
+					HID_RI_LOGICAL_MAXIMUM(16, 0x0400), 	\ 
 					HID_RI_PHYSICAL_MINIMUM(16, 0x0000), 	\
-					HID_RI_PHYSICAL_MAXIMUM(16, 0xFFFF), 	\
+					HID_RI_PHYSICAL_MAXIMUM(16, 0xFFFF), 	\ 
 					HID_RI_REPORT_COUNT(8, 2),           	\
 					HID_RI_REPORT_SIZE(8, 16), 				\
 					HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE), \

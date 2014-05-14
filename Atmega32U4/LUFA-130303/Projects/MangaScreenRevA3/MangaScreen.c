@@ -172,7 +172,7 @@ void SetupHardware(void){
 	DDRD  &= ~PD5; 		// EEPROM as inpu
 
 	/* Now we can turn on BL */
-	for(i=0; i<128; i++){
+	for(i=0; i<10; i++){
 		BL_on(i);
 		_delay_ms(10);
 	}
@@ -181,7 +181,9 @@ void SetupHardware(void){
 	/* Init the LEDs now to show that the hardware init has gone ok */
 	LEDs_Init();
 
-	printf(">");
+    //dev_dbg("Debug is on\n");
+
+	//printf(">");
 }
 
 
@@ -251,6 +253,8 @@ int execute_command(void){
 		printf("set backlight <0..255>\n");
 		printf("set display <on/off>\n");
 	}
+    
+    dev_dbg("Debug is on\n");
 
 	printf(">");
 
@@ -308,8 +312,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 
 	USB_DigitizerReport_Data_t* DigitizerReport = (USB_DigitizerReport_Data_t*)ReportData;
-	
-	//if(enable_reports)
+
+    // XXX: The report can vary in size depending on how many contacts are 
+    // touching the digitizer. This must be reflected in the size of the report.. (??) 	
+
 	if (Digitizer_get_report(DigitizerReport))
 	    *ReportSize = 0;
     else

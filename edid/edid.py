@@ -87,7 +87,7 @@ pix_rat     = 0
 v_freq      = 0
 
 # Descriptor 1, 54-71
-pix_clk         = 2459      # Pixel clock in 10 kHz units
+pix_clk         = 2500      # Pixel clock in 10 kHz units
 hor_act         = 480       # Horizontal active pixels 8 lsbits 
 hor_blank       = 32        # Horizontal blanking pixels 8 lsbits End of act to start of next act.  (HBLK)
 vert_act        = 800       # Vertical active lines 8 lsbits (0-4095)                               

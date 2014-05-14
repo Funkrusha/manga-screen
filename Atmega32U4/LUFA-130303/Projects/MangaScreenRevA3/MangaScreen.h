@@ -46,20 +46,17 @@
 		#include "Descriptors.h"
 		#include "LCD.h"
 		#include "Digitizer.h"
-		#include "EEPROM.h"
 
 		#include <LUFA/Drivers/Board/LEDs.h>
-		//#include <LUFA/Drivers/Board/Joystick.h>
 		#include <LUFA/Drivers/Board/Buttons.h>
 		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include <LUFA/Drivers/USB/USB.h>
 
+		// Debug messages are piped to printf. 
 		#define dev_err(format, arg...) printf(format , ## arg)
 		#define dev_info(format, arg...) printf(format , ## arg)
-		#define dev_dbg(format, arg...) printf(format , ## arg)
 		#define dev_warn(format, arg...) printf(format , ## arg)
-
-
+		#define dev_dbg(format, arg...) printf(format , ## arg)
 
 	/* Macros: */
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
